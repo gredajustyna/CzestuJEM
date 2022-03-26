@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "806410887635",
+    "project_id": "czestujem",
+    "storage_bucket": "czestujem.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:806410887635:android:a139d72bf337d8f5100f26",
+        "android_client_info": {
+          "package_name": "com.example.czestujem"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "806410887635-c5u0lme9eclq3omoavfk0d1vv8n988ea.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIgEsiKW2zlANPBMbCLOdkbBfbLrrr1rc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "806410887635-c5u0lme9eclq3omoavfk0d1vv8n988ea.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
