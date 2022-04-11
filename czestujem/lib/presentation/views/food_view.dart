@@ -3,7 +3,10 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:czestujem/data/datasources/fire_base.dart';
+import 'package:czestujem/domain/entities/message.dart';
 import 'package:czestujem/presentation/blocs/favourite_bloc/favourite_event.dart';
+import 'package:czestujem/presentation/blocs/messages_bloc/messages_bloc.dart';
+import 'package:czestujem/presentation/blocs/messages_bloc/messages_event.dart';
 import 'package:czestujem/presentation/blocs/rating_bloc/rating_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -204,17 +207,23 @@ class _FoodViewState extends State<FoodView> {
                                   padding: EdgeInsets.all(1.h),
                                   child: Row(
                                     children: [
-                                      CircleAvatar(
-                                        child: FirebaseAuth.instance.currentUser!.photoURL != null ?
-                                        Image.network(FirebaseAuth.instance.currentUser!.photoURL!) :
-                                        Icon(LineIcons.userCircle,
-                                          size: 60,
-                                          color: foodBlueGreen,
+                                      Container(
+                                        child:  FirebaseAuth.instance.currentUser!.photoURL != null ?
+                                        CircleAvatar(
+                                          backgroundImage: NetworkImage(FirebaseAuth.instance.currentUser!.photoURL!),
+                                          radius: 30,
+                                          backgroundColor: Colors.transparent,
+                                        ) :
+                                        CircleAvatar(
+                                          child: Icon(LineIcons.userCircle,
+                                            size: 60,
+                                            color: foodBlueGreen,
+                                          ),
+                                          radius: 30,
+                                          backgroundColor: Colors.transparent,
                                         ),
-                                        radius: 30,
-                                        backgroundColor: Colors.transparent,
                                       ),
-                                      SizedBox(width: 1.w,),
+                                      SizedBox(width: 2.w,),
                                       Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         mainAxisAlignment: MainAxisAlignment.start,
@@ -353,6 +362,62 @@ class _FoodViewState extends State<FoodView> {
     );
   }
 
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                Text("Czy jesteś pewien, że chcesz zarezerwować: ${food.name}?",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: foodBlueGreen,
+                  ),
+                ),
+                Text("Użytkownik, który wystawił porcję zostanie o tym powiadomiony!",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: foodBlueGreen,
+                  ),
+                ),
+              ],
+            )
+          ),
+          actions: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  child: const Text('Rezerwuję',
+                    style: TextStyle(
+                        color: foodBlueGreen
+                    ),
+                  ),
+                  onPressed: () {
+
+                  },
+                ),
+                TextButton(
+                  child: const Text('Anuluj',
+                    style: TextStyle(
+                        color: foodOrange
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildLikeHeart(BuildContext context){
     return BlocBuilder<CheckFavouriteBloc, CheckFavouritesState>(
       builder: (context, state){
@@ -412,86 +477,170 @@ class _FoodViewState extends State<FoodView> {
 
   Widget _buildBottomAppBar(){
     if(food.uid == FirebaseAuth.instance.currentUser!.uid){
-      return BottomAppBar(
-        color: Colors.grey[100],
-        elevation: 0,
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 1.h, vertical: 1.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () {
+      if(food.status == 'zarezerwowane'){
+        return BottomAppBar(
+          color: Colors.grey[100],
+          elevation: 0,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 1.h, vertical: 1.w),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
 
-                },
-                child: Row(
-                  children: [
-                    Icon(LineIcons.times,
-                      color: foodOrange,
-                    ),
-                    Text(
-                      'Usuń',
-                      style: TextStyle(
-                          color: foodOrange,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15.sp
+                  },
+                  child: Row(
+                    children: [
+                      Icon(LineIcons.times,
+                        color: foodOrange,
                       ),
-                    ),
-                  ],
-                ),
-                style: ButtonStyle(
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
-                        side: BorderSide(color: foodOrange,
-                          width: 2,
+                      Text(
+                        'Usuń rezerwację',
+                        style: TextStyle(
+                            color: foodOrange,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15.sp
                         ),
-                      )
+                      ),
+                    ],
                   ),
-                  backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                  elevation: MaterialStateProperty.all<double>(0),
-                  padding: MaterialStateProperty.all(EdgeInsets.symmetric(vertical: 10, horizontal: 15)),
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                          side: BorderSide(color: foodOrange,
+                            width: 2,
+                          ),
+                        )
+                    ),
+                    backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                    elevation: MaterialStateProperty.all<double>(0),
+                    padding: MaterialStateProperty.all(EdgeInsets.symmetric(vertical: 10, horizontal: 15)),
+                  ),
                 ),
-              ),
-              SizedBox(width: 3.w,),
-              ElevatedButton(
-                onPressed: () {
+                SizedBox(width: 3.w,),
+                ElevatedButton(
+                  onPressed: () {
 
-                },
-                child: Row(
-                  children: [
-                    Icon(LineIcons.pen,
-                      color: foodGrey,
-                    ),
-                    Text(
-                      'Edytuj',
-                      style: TextStyle(
-                          color: foodGrey,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15.sp
+                  },
+                  child: Row(
+                    children: [
+                      Icon(LineIcons.check,
+                        color: foodBlueGreen,
                       ),
-                    ),
-                  ],
-                ),
-                style: ButtonStyle(
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
-                        side: BorderSide(color: foodGrey,
-                          width: 2,
+                      Text(
+                        'Potwierdź odbiór',
+                        style: TextStyle(
+                            color: foodBlueGreen,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15.sp
                         ),
-                      )
+                      ),
+                    ],
                   ),
-                  backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                  elevation: MaterialStateProperty.all<double>(0),
-                  padding: MaterialStateProperty.all(EdgeInsets.symmetric(vertical: 10, horizontal: 15)),
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                          side: BorderSide(color: foodBlueGreen,
+                            width: 2,
+                          ),
+                        )
+                    ),
+                    backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                    elevation: MaterialStateProperty.all<double>(0),
+                    padding: MaterialStateProperty.all(EdgeInsets.symmetric(vertical: 10, horizontal: 15)),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      );
+        );
+      }else{
+        return BottomAppBar(
+          color: Colors.grey[100],
+          elevation: 0,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 1.h, vertical: 1.w),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+
+                  },
+                  child: Row(
+                    children: [
+                      Icon(LineIcons.times,
+                        color: foodOrange,
+                      ),
+                      Text(
+                        'Usuń',
+                        style: TextStyle(
+                            color: foodOrange,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15.sp
+                        ),
+                      ),
+                    ],
+                  ),
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                          side: BorderSide(color: foodOrange,
+                            width: 2,
+                          ),
+                        )
+                    ),
+                    backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                    elevation: MaterialStateProperty.all<double>(0),
+                    padding: MaterialStateProperty.all(EdgeInsets.symmetric(vertical: 10, horizontal: 15)),
+                  ),
+                ),
+                SizedBox(width: 3.w,),
+                ElevatedButton(
+                  onPressed: () {
+
+                  },
+                  child: Row(
+                    children: [
+                      Icon(LineIcons.pen,
+                        color: foodGrey,
+                      ),
+                      Text(
+                        'Edytuj',
+                        style: TextStyle(
+                            color: foodGrey,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15.sp
+                        ),
+                      ),
+                    ],
+                  ),
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                          side: BorderSide(color: foodGrey,
+                            width: 2,
+                          ),
+                        )
+                    ),
+                    backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                    elevation: MaterialStateProperty.all<double>(0),
+                    padding: MaterialStateProperty.all(EdgeInsets.symmetric(vertical: 10, horizontal: 15)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
     }
     return BottomAppBar(
       color: Colors.grey[100],
@@ -503,8 +652,12 @@ class _FoodViewState extends State<FoodView> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () {
-
+              onPressed: () async{
+                _showMyDialog();
+                // var user = await FireBase.getUserFromUid(food.uid).then((value) {
+                //   Map<String, dynamic> message = {'user' : value, 'message' : Message('Witaj, jestem zainteresowana/y porcją: ${food.name}. Kiedy możemy się spotkać?', DateTime.now(), FirebaseAuth.instance.currentUser!.uid, false)};
+                //   BlocProvider.of<MessagesBloc>(context).add(SendMessage(message));
+                // });
               },
               child: Row(
                 children: [

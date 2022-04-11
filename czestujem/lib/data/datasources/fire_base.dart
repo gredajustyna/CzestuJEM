@@ -3,7 +3,9 @@ import 'dart:math';
 import 'package:czestujem/core/utils/globals.dart' as globals;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:czestujem/domain/entities/fireuser.dart';
 import 'package:czestujem/domain/entities/food.dart';
+import 'package:czestujem/domain/entities/message.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:location/location.dart';
@@ -23,8 +25,10 @@ class FireBase{
     return result;
   }
 
-  static Future<void> createChat(chatUsers)async {
-    FirebaseFirestore.instance.collection('chats').doc().set(chatUsers).catchError((e){});
+  static Future<dynamic> createChat(FireUser user)async {
+    DocumentReference documentReference = FirebaseFirestore.instance.collection('chats').doc();
+    List<String> users = [user.uid, FirebaseAuth.instance.currentUser!.uid];
+    documentReference.set({'users' : users});
   }
 
   static Future<String> getUserName(String uid) async{
@@ -44,6 +48,16 @@ class FireBase{
       }
     });
     return username;
+  }
+
+  static Future<FireUser> getUserFromUid(String uid) async{
+    late FireUser user;
+    var userDoc = await FirebaseFirestore.instance.collection('usersCollection').where('uid', isEqualTo: uid).get();
+    userDoc.docs.forEach((element) async{
+      user = FireUser.fromJSON(element.data());
+      print(user);
+    });
+    return user;
   }
   
   static Future<dynamic> addFood(String foodFileName, File foodImageFile, Food food) async{
@@ -93,7 +107,7 @@ class FireBase{
   static Future<dynamic> getMyFridge(String uid) async{
     var foodDoc = FirebaseFirestore.instance.collection('foodCollection');
     List<Map<String,dynamic>> foods = [];
-    var myFoods = await foodDoc.snapshots().first;
+    var myFoods = await foodDoc.get();
     myFoods.docs.forEach((element) {
       if(element['uid'] == uid){
         foods.add(element.data());
@@ -119,14 +133,19 @@ class FireBase{
   }
 
   static Future<dynamic> getTopUsers() async{
-    List<String> topUsers =[];
+    List<FireUser> topUsers =[];
+    List<FireUser> users = [];
     var userCollection = FirebaseFirestore.instance.collection('usersCollection');
     var userDoc = await userCollection.snapshots().first;
-    userDoc.docs.forEach((doc) {
-      if(doc['rating'] > 4.4 && doc['timesRated'] >50){
-        topUsers.add(doc['uid']);
+    users = userDoc.docs.map((e) => FireUser.fromJSON(e.data())).toList();
+    for(FireUser user in users){
+      if(user.rating > 4.4 && user.timesRated >50){
+        topUsers.add(user);
       }
-    });
+      if(user.uid == FirebaseAuth.instance.currentUser!.uid){
+        topUsers.remove(user);
+      }
+    }
     return topUsers;
   }
 
@@ -140,10 +159,118 @@ class FireBase{
         foods.add(element);
       }
     });
-    print(foods);
-    // snapFoods.docs.forEach((element) {
-    //   if(element['location'])
-    // })
+    return foods;
+  }
+
+  static Future<void> updateUserData(String fileName, File imageFile, String? username) async{
+    String photoURL = '';
+    var uploadTask = await FirebaseStorage.instance.ref(fileName).putFile(imageFile).whenComplete(() async =>
+    photoURL = await FirebaseStorage.instance.ref(fileName).getDownloadURL(),
+    );
+    FirebaseAuth.instance.currentUser?.updatePhotoURL(photoURL);
+    DocumentReference documentReference = FirebaseFirestore.instance.collection("usersCollection").doc(FirebaseAuth.instance.currentUser?.uid);
+    documentReference.update({'photoURL' : photoURL});
+    if(username != null){
+      FirebaseAuth.instance.currentUser!.updateDisplayName(username);
+    }
+  }
+
+  static Future<dynamic> searchFood(String name) async{
+    var foodDoc = FirebaseFirestore.instance.collection('foodCollection');
+    List<Food> foods = [];
+    var snapFoods = await foodDoc.get();
+    var temp = snapFoods.docs.map((e) => Food.fromJSON(e.data())).toList();
+    temp.forEach((element) {
+      if(element.name.contains(name)){
+        foods.add(element);
+      }
+    });
+    return foods;
+  }
+
+  static Future<dynamic> getConversationUsers() async{
+    List<FireUser> users =[];
+    var chatsDoc = FirebaseFirestore.instance.collection('chats');
+    var snapChats = await chatsDoc.snapshots(includeMetadataChanges: true).first;
+    var snapData = snapChats.docs.map((e) => e.data());
+    for (var element in snapData){
+      if(element['users'][0].toString().contains(FirebaseAuth.instance.currentUser!.uid) || element['users'][1].toString().contains(FirebaseAuth.instance.currentUser!.uid)){
+        if(element['users'][0].toString().contains(FirebaseAuth.instance.currentUser!.uid)){
+          var user = await getUserFromUid(element['users'][1].toString());
+          print(user.name);
+          users.add(user);
+        }else{
+          var user = await getUserFromUid(element['users'][0].toString());
+          print(user.name);
+          users.add(user);
+        }
+      }
+    }
+    return users;
+  }
+
+  static Future<dynamic> getConversationDocId(FireUser user) async{
+    List<String> allDocs=[];
+    List<String> rightDocs=[];
+    var chatsDoc = FirebaseFirestore.instance.collection('chats');
+    var snapChats = await chatsDoc.snapshots().first;
+    for (var element in snapChats.docs) {
+      allDocs.add(element.reference.id);
+    }
+    print(allDocs);
+    var snapData = snapChats.docs.map((e) => e.data());
+    int index = 0;
+    for (var element in snapData){
+      if((element['users'][0].toString().contains(FirebaseAuth.instance.currentUser!.uid) && element['users'][1].toString().contains(user.uid))
+          || (element['users'][1].toString().contains(FirebaseAuth.instance.currentUser!.uid) && element['users'][0].toString().contains(user.uid))){
+        rightDocs.add(allDocs.elementAt(index));
+      }else{
+      }
+      index++;
+    }
+    if(rightDocs.length ==0){
+      await createChat(user);
+      await getConversationDocId(user);
+    }
+    print(rightDocs);
+    return rightDocs.single;
+  }
+
+  static Future<dynamic> getMessages(FireUser user) async{
+    CollectionReference chats = FirebaseFirestore.instance.collection("chats");
+    String docId = await getConversationDocId(user);
+    CollectionReference messages = chats.doc(docId).collection("messages");
+    var snapFoods = await messages.get();
+    var temp = snapFoods.docs.map((e) => Message.fromJson(e.data() as Map<String, dynamic>)).toList();
+    temp.sort((a,b) => a.sent.compareTo(b.sent));
+    print(temp);
+    print(temp.reversed.toList());
+    return temp.reversed.toList();
+  }
+
+  static Future<dynamic> getMessagesReal(FireUser user) async{
+    CollectionReference chats = FirebaseFirestore.instance.collection("chats");
+    String docId = await getConversationDocId(user);
+    CollectionReference messages = chats.doc(docId).collection("messages");
+    var snapFoods = await messages.get();
+    var temp = snapFoods.docs.map((e) => Message.fromJson(e.data() as Map<String, dynamic>)).toList();
+    temp.sort((a,b) => a.sent.compareTo(b.sent));
+    print(temp);
+    print(temp.reversed.toList());
+    return temp.reversed.toList();
+  }
+
+
+  static Future<dynamic> sendMessage(Message message, FireUser user) async{
+    CollectionReference chats = FirebaseFirestore.instance.collection("chats");
+    String docId = await getConversationDocId(user);
+    CollectionReference messages = chats.doc(docId).collection("messages");
+    messages.doc().set(message.toJson());
+  }
+
+  static Future<void> updateFoodStatus(Food food) async{
+    var documentReference = await FirebaseFirestore.instance.collection("foodCollection").where('id' == food.id).get();
+    await documentReference.docs.single.reference.update({'status' : 'zarezerwowane'});
   }
 
 

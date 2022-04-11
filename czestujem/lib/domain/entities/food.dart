@@ -9,8 +9,9 @@ class Food{
   DateTime expirationDate;
   String uid;
   String id;
+  String status;
 
-  Food(this.photoURL, this.name, this.description, this.location, this.category, this.expirationDate, this.uid, this.id);
+  Food(this.photoURL, this.name, this.description, this.location, this.category, this.expirationDate, this.uid, this.id, this.status);
 
   Food.fromJSON(Map<String, dynamic> json) :
       photoURL = json['photoURL'] as String,
@@ -20,7 +21,8 @@ class Food{
       category = json['category'] as String,
       expirationDate = json['expirationDate'].toDate(),
       uid = json['uid'] as String,
-      id = json['id'] as String;
+      id = json['id'] as String,
+      status = json['status'] as String;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'expirationDate': Timestamp.fromDate(expirationDate),
@@ -30,7 +32,8 @@ class Food{
     'category' : category,
     'photoURL' : photoURL,
     'uid' : uid,
-    'id' : id
+    'id' : id,
+    'status' : status
   };
 
 }

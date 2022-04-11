@@ -4,21 +4,33 @@ import 'package:czestujem/domain/usecases/add_food_usecase.dart';
 import 'package:czestujem/domain/usecases/add_to_favourites_usecase.dart';
 import 'package:czestujem/domain/usecases/check_if_favourite_usecase.dart';
 import 'package:czestujem/domain/usecases/get_all_favourites_usecase.dart';
+import 'package:czestujem/domain/usecases/get_all_messages_usecase.dart';
+import 'package:czestujem/domain/usecases/get_conversation_users_usecase.dart';
+import 'package:czestujem/domain/usecases/get_food_by_radius_usecase.dart';
 import 'package:czestujem/domain/usecases/get_my_food_usecase.dart';
 import 'package:czestujem/domain/usecases/get_rating_usecase.dart';
+import 'package:czestujem/domain/usecases/get_top_users_usecase.dart';
 import 'package:czestujem/domain/usecases/get_username_from_uid_usecase.dart';
 import 'package:czestujem/domain/usecases/login_usecase.dart';
 import 'package:czestujem/domain/usecases/register_usecase.dart';
 import 'package:czestujem/domain/usecases/remove_from_favourites_usecase.dart';
 import 'package:czestujem/domain/usecases/reset_password_usecase.dart';
+import 'package:czestujem/domain/usecases/search_food_usecase.dart';
+import 'package:czestujem/domain/usecases/send_message_usecase.dart';
+import 'package:czestujem/domain/usecases/update_user_data_usecase.dart';
+import 'package:czestujem/presentation/blocs/conversation_users_bloc/conversation_users_bloc.dart';
 import 'package:czestujem/presentation/blocs/favourite_bloc/favourite_bloc.dart';
 import 'package:czestujem/presentation/blocs/food_bloc/food_bloc.dart';
 import 'package:czestujem/presentation/blocs/fridge_bloc/fridge_bloc.dart';
 import 'package:czestujem/presentation/blocs/get_username_bloc/get_username_bloc.dart';
 import 'package:czestujem/presentation/blocs/login_bloc/login_bloc.dart';
+import 'package:czestujem/presentation/blocs/messages_bloc/messages_bloc.dart';
 import 'package:czestujem/presentation/blocs/rating_bloc/rating_bloc.dart';
 import 'package:czestujem/presentation/blocs/register_bloc/register_bloc.dart';
 import 'package:czestujem/presentation/blocs/reset_password_bloc/reset_password_bloc.dart';
+import 'package:czestujem/presentation/blocs/search_bloc/search_bloc.dart';
+import 'package:czestujem/presentation/blocs/top_users_bloc/top_users_bloc.dart';
+import 'package:czestujem/presentation/blocs/user_data_bloc/user_data_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get_it/get_it.dart';
 
@@ -41,6 +53,13 @@ Future<void> initializeDependencies() async {
   injector.registerSingleton<GetMyFoodUseCase>(GetMyFoodUseCase(injector()));
   injector.registerSingleton<GetRatingUseCase>(GetRatingUseCase(injector()));
   injector.registerSingleton<AddFoodUseCase>(AddFoodUseCase(injector()));
+  injector.registerSingleton<GetFoodByRadiusUseCase>(GetFoodByRadiusUseCase(injector()));
+  injector.registerSingleton<UpdateUserDataUseCase>(UpdateUserDataUseCase(injector()));
+  injector.registerSingleton<GetTopUsersUseCase>(GetTopUsersUseCase(injector()));
+  injector.registerSingleton<SearchFoodUseCase>(SearchFoodUseCase(injector()));
+  injector.registerSingleton<GetConversationUsersUseCase>(GetConversationUsersUseCase(injector()));
+  injector.registerSingleton<GetAllMessagesUseCase>(GetAllMessagesUseCase(injector()));
+  injector.registerSingleton<SendMessageUseCase>(SendMessageUseCase(injector()));
 
   //blocs
   injector.registerFactory<LoginBloc>(() => LoginBloc(injector()));
@@ -53,6 +72,12 @@ Future<void> initializeDependencies() async {
   injector.registerFactory<GetFridgeBloc>(() => GetFridgeBloc(injector()));
   injector.registerFactory<RatingBloc>(() => RatingBloc(injector()));
   injector.registerFactory<FoodBloc>(() => FoodBloc(injector()));
+  injector.registerFactory<FoodByRadiusBloc>(() => FoodByRadiusBloc(injector()));
+  injector.registerFactory<UserDataBloc>(() => UserDataBloc(injector()));
+  injector.registerFactory<TopUsersBloc>(() => TopUsersBloc(injector()));
+  injector.registerFactory<SearchBloc>(() => SearchBloc(injector()));
+  injector.registerFactory<ConversationUsersBloc>(() => ConversationUsersBloc(injector()));
+  injector.registerFactory<MessagesBloc>(() => MessagesBloc(injector(), injector()));
 }
 
 Future<FirebaseApp> _initializeFirebase() async {

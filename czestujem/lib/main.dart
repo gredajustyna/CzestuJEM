@@ -1,10 +1,15 @@
+import 'package:czestujem/presentation/blocs/conversation_users_bloc/conversation_users_bloc.dart';
 import 'package:czestujem/presentation/blocs/favourite_bloc/favourite_bloc.dart';
 import 'package:czestujem/presentation/blocs/food_bloc/food_bloc.dart';
 import 'package:czestujem/presentation/blocs/fridge_bloc/fridge_bloc.dart';
 import 'package:czestujem/presentation/blocs/login_bloc/login_bloc.dart';
+import 'package:czestujem/presentation/blocs/messages_bloc/messages_bloc.dart';
 import 'package:czestujem/presentation/blocs/rating_bloc/rating_bloc.dart';
 import 'package:czestujem/presentation/blocs/register_bloc/register_bloc.dart';
 import 'package:czestujem/presentation/blocs/reset_password_bloc/reset_password_bloc.dart';
+import 'package:czestujem/presentation/blocs/search_bloc/search_bloc.dart';
+import 'package:czestujem/presentation/blocs/top_users_bloc/top_users_bloc.dart';
+import 'package:czestujem/presentation/blocs/user_data_bloc/user_data_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sizer/sizer.dart';
@@ -61,6 +66,24 @@ Future<void> main() async{
       ),
       BlocProvider(
           create: (_) => injector<FoodBloc>()
+      ),
+      BlocProvider(
+          create: (_) => injector<FoodByRadiusBloc>()
+      ),
+      BlocProvider(
+          create: (_) => injector<UserDataBloc>()
+      ),
+      BlocProvider(
+          create: (_) => injector<TopUsersBloc>()
+      ),
+      BlocProvider(
+          create: (_) => injector<SearchBloc>()
+      ),
+      BlocProvider(
+          create: (_) => injector<ConversationUsersBloc>()
+      ),
+      BlocProvider(
+          create: (_) => injector<MessagesBloc>()
       ),
     ],
     child: MyApp())

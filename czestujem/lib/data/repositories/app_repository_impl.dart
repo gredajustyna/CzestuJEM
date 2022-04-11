@@ -2,8 +2,11 @@ import 'dart:io';
 
 import 'package:czestujem/data/datasources/fire_auth.dart';
 import 'package:czestujem/data/datasources/fire_base.dart';
+import 'package:czestujem/domain/entities/fireuser.dart';
 import 'package:czestujem/domain/entities/food.dart';
+import 'package:czestujem/domain/entities/message.dart';
 import 'package:czestujem/domain/repositories/app_repository.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AppRepositoryImpl implements AppRepository{
   @override
@@ -88,6 +91,52 @@ class AppRepositoryImpl implements AppRepository{
   Future getFoodByRadius() async{
     var result = await FireBase.getFoodByRadius();
     return result;
+  }
+
+  @override
+  Future<void> updateUserData(Map<String, dynamic> data) async{
+    await FireBase.updateUserData(data['fileName'], data['imageFile'], data['username']);
+  }
+
+  @override
+  Future<List<FireUser>> getTopUsers() async{
+    var result = await FireBase.getTopUsers();
+    return result;
+  }
+
+  @override
+  Future<List<Food>> searchFood(String name) async{
+    var result = await FireBase.searchFood(name);
+    return result;
+  }
+
+  @override
+  Future getConversationUsers() async{
+    var result = await FireBase.getConversationUsers();
+    return result;
+  }
+
+  @override
+  Future<List<Message>> getAllMessages(FireUser user) async{
+    var result = await FireBase.getMessages(user);
+    return result;
+  }
+
+  @override
+  Future<void> sendMessage(FireUser user, Message message) async{
+    await FireBase.sendMessage(message, user);
+  }
+
+  @override
+  Future<String> getConversationDocId(FireUser user) async{
+    var result = await FireBase.getConversationDocId(user);
+    return result;
+  }
+
+  Future<dynamic> reserveFood(Food food, FireUser user) async {
+    var message = Message('Witaj, jestem zainteresowana/y porcją: ${food.name}. Kiedy możemy się spotkać?', DateTime.now(), FirebaseAuth.instance.currentUser!.uid, false);
+    await FireBase.sendMessage(message, user);
+    await FireBase.updateFoodStatus(food);
   }
 
 

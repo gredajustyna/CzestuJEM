@@ -29,33 +29,42 @@ class _UserViewState extends State<UserView> {
   @override
   void initState() {
     listItems=[
-      Row(
-        children: [
-          CircleAvatar(
-            child: photoURL != null ? 
-              Image.network(photoURL!) : 
-              Icon(LineIcons.userCircle, 
-                size: 80,
+      Padding(
+        padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 2.w),
+        child: Row(
+          children: [
+            photoURL != null ?
+            CircleAvatar(
+              backgroundImage: NetworkImage(photoURL!),
+              radius: 30,
+              backgroundColor: Colors.transparent,
+            )
+                :
+            CircleAvatar(
+              child: Icon(LineIcons.userCircle,
+                size: 100,
                 color: foodBlueGreen,
               ),
-            radius: 50,
-            backgroundColor: Colors.transparent,
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                user!.displayName!,
-                style: TextStyle(
-                  color: foodBlueGreen,
-                  fontSize: 16.sp,
+              radius: 50,
+              backgroundColor: Colors.transparent,
+            ),
+            SizedBox(width: 2.w,),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user!.displayName!,
+                  style: TextStyle(
+                    color: foodBlueGreen,
+                    fontSize: 16.sp,
+                  ),
                 ),
-              ),
-              SizedBox(height: 4,),
-              _buildFacesRow()
-            ],
-          )
-        ],
+                SizedBox(height: 4,),
+                _buildFacesRow()
+              ],
+            )
+          ],
+        ),
       ),
       ListTile(
         leading: Icon(LineIcons.gifts),

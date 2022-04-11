@@ -1,19 +1,24 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Message {
   final String content;
-  final DateTime date;
+  final DateTime sent;
   final String from;
+  final bool seen;
 
-  Message(this.content, this.date, this.from);
+  Message(this.content, this.sent, this.from, this.seen);
 
-  Message.fromJson(Map<dynamic, dynamic> json)
-      : date = DateTime.parse(json['date'] as String),
-        content = json['text'] as String,
-        from = json['text'] as String;
+  Message.fromJson(Map<String, dynamic> json)
+      : sent = json['sent'].toDate(),
+        content = json['content'] as String,
+        from = json['from'] as String,
+        seen = json['seen'] as bool;
 
-  Map<dynamic, dynamic> toJson() => <dynamic, dynamic>{
-    'date': date.toString(),
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'sent': Timestamp.fromDate(sent),
     'content': content,
-    'from': from
+    'from': from,
+    'seen' : seen
   };
 
 }

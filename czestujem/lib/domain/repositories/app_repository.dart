@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:czestujem/domain/entities/fireuser.dart';
+import 'package:czestujem/domain/entities/message.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../entities/food.dart';
@@ -30,4 +32,18 @@ abstract class AppRepository{
   Future<dynamic> addFood(String foodFileName, File foodImageFile, Food food);
 
   Future<dynamic> getFoodByRadius();
+
+  Future<void> updateUserData(Map<String, dynamic> data);
+
+  Future<List<FireUser>> getTopUsers();
+
+  Future<List<Food>> searchFood(String name);
+
+  Future<dynamic> getConversationUsers();
+
+  Future<List<Message>> getAllMessages(FireUser user);
+
+  Future<void> sendMessage(FireUser user, Message message);
+
+  Future<String> getConversationDocId(FireUser user);
 }
