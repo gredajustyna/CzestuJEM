@@ -66,11 +66,16 @@ class _UserViewState extends State<UserView> {
           ],
         ),
       ),
-      ListTile(
-        leading: Icon(LineIcons.gifts),
-        title: Text("Moje rezerwacje",
-          style: TextStyle(
-            color: foodGrey,
+      GestureDetector(
+        onTap: (){
+          Navigator.pushNamed(context, '/reservations');
+        },
+        child: ListTile(
+          leading: Icon(LineIcons.gifts),
+          title: Text("Moje rezerwacje",
+            style: TextStyle(
+              color: foodGrey,
+            ),
           ),
         ),
       ),
@@ -100,11 +105,16 @@ class _UserViewState extends State<UserView> {
           ),
         ),
       ),
-      ListTile(
-        leading: Icon(LineIcons.smilingFace),
-        title: Text("Oceń użytkowników",
-          style: TextStyle(
-            color: foodGrey,
+      GestureDetector(
+        onTap: (){
+          Navigator.pushNamed(context, '/rateUsers');
+        },
+        child: ListTile(
+          leading: Icon(LineIcons.smilingFace),
+          title: Text("Oceń użytkowników",
+            style: TextStyle(
+              color: foodGrey,
+            ),
           ),
         ),
       ),

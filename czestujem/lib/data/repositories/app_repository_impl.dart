@@ -136,7 +136,29 @@ class AppRepositoryImpl implements AppRepository{
   Future<dynamic> reserveFood(Food food, FireUser user) async {
     var message = Message('Witaj, jestem zainteresowana/y porcją: ${food.name}. Kiedy możemy się spotkać?', DateTime.now(), FirebaseAuth.instance.currentUser!.uid, false);
     await FireBase.sendMessage(message, user);
-    await FireBase.updateFoodStatus(food);
+    await FireBase.updateFoodStatus(food, 'zarezerwowane');
+  }
+
+  @override
+  Future<FireUser> getUserFromUid(String uid) async{
+    var result = await FireBase.getUserFromUid(uid);
+    return result;
+  }
+
+  @override
+  Future<List<FireUser>> getUsersToRate(String uid) async{
+    var result = await FireBase.getUsersToRate(uid);
+    return result;
+  }
+
+  @override
+  Future<void> rateUser(FireUser user, double mark) async{
+    await FireBase.rateUser(user, mark);
+  }
+
+  @override
+  Future<void> deleteFood(Food food) async {
+    await FireBase.deleteFood(food);
   }
 
 

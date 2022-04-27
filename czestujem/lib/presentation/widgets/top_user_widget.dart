@@ -1,4 +1,5 @@
 import 'package:czestujem/presentation/blocs/get_username_bloc/get_username_event.dart';
+import 'package:czestujem/presentation/views/user_profile_view.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:line_icons/line_icons.dart';
@@ -28,60 +29,64 @@ class _TopUserWidgetState extends State<TopUserWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        side: BorderSide(
-          color: foodOrange,
-          width: 1,
+    return InkWell(
+      onTap: (){
+        Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => UserProfileView(user: user)));
+      },
+      child: Card(
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: foodOrange,
+            width: 1,
+          ),
         ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 2.w),
-        child: Center(
-          child: Column(
-            children: [
-              Container(
-                child:  user.photoURL != '' ?
-                CircleAvatar(
-                  backgroundImage: NetworkImage(user.photoURL),
-                  radius: 40,
-                  backgroundColor: Colors.transparent,
-                ) :
-                const CircleAvatar(
-                  child: Icon(LineIcons.userCircle,
-                    size: 80,
-                    color: foodBlueGreen,
-                  ),
-                  radius: 40,
-                  backgroundColor: Colors.transparent,
-                ),
-              ),
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: 1.h),
-                  child: Text(user.name,
-                    style: TextStyle(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 2.h, horizontal: 2.w),
+          child: Center(
+            child: Column(
+              children: [
+                Container(
+                  child:  user.photoURL != '' ?
+                  CircleAvatar(
+                    backgroundImage: NetworkImage(user.photoURL),
+                    radius: 40,
+                    backgroundColor: Colors.transparent,
+                  ) :
+                  const CircleAvatar(
+                    child: Icon(LineIcons.userCircle,
+                      size: 80,
                       color: foodBlueGreen,
-                      letterSpacing: 2,
-                      fontSize: 15.sp,
                     ),
-               ),
+                    radius: 40,
+                    backgroundColor: Colors.transparent,
+                  ),
                 ),
-              Row(
-                children: [
-                  _buildFacesRow(user.rating),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 1.w),
-                    child: Text(
-                      '(${user.timesRated})',
+                    padding: EdgeInsets.symmetric(vertical: 1.h),
+                    child: Text(user.name,
                       style: TextStyle(
-                        color: foodGrey,
+                        color: foodBlueGreen,
+                        letterSpacing: 2,
+                        fontSize: 15.sp,
                       ),
-                    ),
-                  )
-                ],
-              ),
-
-            ],
+                 ),
+                  ),
+                Row(
+                  children: [
+                    _buildFacesRow(user.rating),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 1.w),
+                      child: Text(
+                        '(${user.timesRated})',
+                        style: TextStyle(
+                          color: foodGrey,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

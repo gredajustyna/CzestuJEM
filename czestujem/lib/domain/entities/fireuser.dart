@@ -4,7 +4,7 @@ class FireUser{
   String name;
   double rating;
   int timesRated;
-  int totalPoints;
+  double totalPoints;
 
   FireUser(this.uid, this.photoURL, this.rating, this.name, this.timesRated, this.totalPoints);
 
@@ -14,7 +14,7 @@ class FireUser{
       name =( json['name'] ?? '') as String,
       rating = (json['rating']).toDouble(),
       timesRated = json['timesRated'],
-      totalPoints = json['totalPoints'];
+      totalPoints = (json['totalPoints']).toDouble();
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'uid' : uid,

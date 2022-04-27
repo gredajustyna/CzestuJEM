@@ -5,6 +5,8 @@ import 'package:czestujem/presentation/views/main_view.dart';
 import 'package:czestujem/presentation/views/start_view.dart';
 import 'package:czestujem/presentation/views/user_cards/favourites_view.dart';
 import 'package:czestujem/presentation/views/user_cards/fridge_view.dart';
+import 'package:czestujem/presentation/views/user_cards/rate_users_view.dart';
+import 'package:czestujem/presentation/views/user_cards/reservations_view.dart';
 import 'package:czestujem/presentation/views/user_cards/settings_view.dart';
 import 'package:flutter/material.dart';
 
@@ -27,6 +29,10 @@ class Routes{
         return _createAnimatedRouteRight(FridgeView());
       case '/settings':
         return _createAnimatedRouteRight(SettingsView());
+      case '/reservations':
+        return _createAnimatedRouteRight(ReservationsView());
+      case '/rateUsers':
+        return _createAnimatedRouteRight(RateUsersView());
       default:
         return null;
     }

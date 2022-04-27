@@ -2,10 +2,13 @@ import 'package:czestujem/presentation/blocs/conversation_users_bloc/conversatio
 import 'package:czestujem/presentation/blocs/favourite_bloc/favourite_bloc.dart';
 import 'package:czestujem/presentation/blocs/food_bloc/food_bloc.dart';
 import 'package:czestujem/presentation/blocs/fridge_bloc/fridge_bloc.dart';
+import 'package:czestujem/presentation/blocs/get_users_to_rate_bloc/get_users_to_rate_bloc.dart';
 import 'package:czestujem/presentation/blocs/login_bloc/login_bloc.dart';
 import 'package:czestujem/presentation/blocs/messages_bloc/messages_bloc.dart';
+import 'package:czestujem/presentation/blocs/rate_user_bloc/rate_user_bloc.dart';
 import 'package:czestujem/presentation/blocs/rating_bloc/rating_bloc.dart';
 import 'package:czestujem/presentation/blocs/register_bloc/register_bloc.dart';
+import 'package:czestujem/presentation/blocs/reserve_food_bloc/reserve_food_bloc.dart';
 import 'package:czestujem/presentation/blocs/reset_password_bloc/reset_password_bloc.dart';
 import 'package:czestujem/presentation/blocs/search_bloc/search_bloc.dart';
 import 'package:czestujem/presentation/blocs/top_users_bloc/top_users_bloc.dart';
@@ -84,6 +87,15 @@ Future<void> main() async{
       ),
       BlocProvider(
           create: (_) => injector<MessagesBloc>()
+      ),
+      BlocProvider(
+          create: (_) => injector<ReserveFoodBloc>()
+      ),
+      BlocProvider(
+          create: (_) => injector<GetUsersToRateBloc>()
+      ),
+      BlocProvider(
+          create: (_) => injector<RateUserBloc>()
       ),
     ],
     child: MyApp())

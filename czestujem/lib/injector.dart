@@ -10,10 +10,14 @@ import 'package:czestujem/domain/usecases/get_food_by_radius_usecase.dart';
 import 'package:czestujem/domain/usecases/get_my_food_usecase.dart';
 import 'package:czestujem/domain/usecases/get_rating_usecase.dart';
 import 'package:czestujem/domain/usecases/get_top_users_usecase.dart';
+import 'package:czestujem/domain/usecases/get_user_from_uid%20_usecase.dart';
 import 'package:czestujem/domain/usecases/get_username_from_uid_usecase.dart';
+import 'package:czestujem/domain/usecases/get_users_to_rate_usecase.dart';
 import 'package:czestujem/domain/usecases/login_usecase.dart';
+import 'package:czestujem/domain/usecases/rate_user_usecase.dart';
 import 'package:czestujem/domain/usecases/register_usecase.dart';
 import 'package:czestujem/domain/usecases/remove_from_favourites_usecase.dart';
+import 'package:czestujem/domain/usecases/reserve_food_usecase.dart';
 import 'package:czestujem/domain/usecases/reset_password_usecase.dart';
 import 'package:czestujem/domain/usecases/search_food_usecase.dart';
 import 'package:czestujem/domain/usecases/send_message_usecase.dart';
@@ -22,11 +26,15 @@ import 'package:czestujem/presentation/blocs/conversation_users_bloc/conversatio
 import 'package:czestujem/presentation/blocs/favourite_bloc/favourite_bloc.dart';
 import 'package:czestujem/presentation/blocs/food_bloc/food_bloc.dart';
 import 'package:czestujem/presentation/blocs/fridge_bloc/fridge_bloc.dart';
+import 'package:czestujem/presentation/blocs/get_user_bloc/get_user_bloc.dart';
 import 'package:czestujem/presentation/blocs/get_username_bloc/get_username_bloc.dart';
+import 'package:czestujem/presentation/blocs/get_users_to_rate_bloc/get_users_to_rate_bloc.dart';
 import 'package:czestujem/presentation/blocs/login_bloc/login_bloc.dart';
 import 'package:czestujem/presentation/blocs/messages_bloc/messages_bloc.dart';
+import 'package:czestujem/presentation/blocs/rate_user_bloc/rate_user_bloc.dart';
 import 'package:czestujem/presentation/blocs/rating_bloc/rating_bloc.dart';
 import 'package:czestujem/presentation/blocs/register_bloc/register_bloc.dart';
+import 'package:czestujem/presentation/blocs/reserve_food_bloc/reserve_food_bloc.dart';
 import 'package:czestujem/presentation/blocs/reset_password_bloc/reset_password_bloc.dart';
 import 'package:czestujem/presentation/blocs/search_bloc/search_bloc.dart';
 import 'package:czestujem/presentation/blocs/top_users_bloc/top_users_bloc.dart';
@@ -60,6 +68,10 @@ Future<void> initializeDependencies() async {
   injector.registerSingleton<GetConversationUsersUseCase>(GetConversationUsersUseCase(injector()));
   injector.registerSingleton<GetAllMessagesUseCase>(GetAllMessagesUseCase(injector()));
   injector.registerSingleton<SendMessageUseCase>(SendMessageUseCase(injector()));
+  injector.registerSingleton<GetUserFromUidUseCase>(GetUserFromUidUseCase(injector()));
+  injector.registerSingleton<ReserveFoodUseCase>(ReserveFoodUseCase(injector()));
+  injector.registerSingleton<GetUsersToRateUseCase>(GetUsersToRateUseCase(injector()));
+  injector.registerSingleton<RateUserUseCase>(RateUserUseCase(injector()));
 
   //blocs
   injector.registerFactory<LoginBloc>(() => LoginBloc(injector()));
@@ -78,6 +90,10 @@ Future<void> initializeDependencies() async {
   injector.registerFactory<SearchBloc>(() => SearchBloc(injector()));
   injector.registerFactory<ConversationUsersBloc>(() => ConversationUsersBloc(injector()));
   injector.registerFactory<MessagesBloc>(() => MessagesBloc(injector(), injector()));
+  injector.registerFactory<GetUserBloc>(() => GetUserBloc(injector()));
+  injector.registerFactory<ReserveFoodBloc>(() => ReserveFoodBloc(injector()));
+  injector.registerFactory<GetUsersToRateBloc>(() => GetUsersToRateBloc(injector()));
+  injector.registerFactory<RateUserBloc>(() => RateUserBloc(injector()));
 }
 
 Future<FirebaseApp> _initializeFirebase() async {

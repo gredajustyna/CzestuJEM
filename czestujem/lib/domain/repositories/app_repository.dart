@@ -46,4 +46,14 @@ abstract class AppRepository{
   Future<void> sendMessage(FireUser user, Message message);
 
   Future<String> getConversationDocId(FireUser user);
+
+  Future<FireUser> getUserFromUid(String uid);
+
+  Future<void> reserveFood(Food food, FireUser user);
+
+  Future<List<FireUser>> getUsersToRate(String uid);
+
+  Future<void> rateUser(FireUser user, double mark);
+
+  Future<void> deleteFood(Food food);
 }
