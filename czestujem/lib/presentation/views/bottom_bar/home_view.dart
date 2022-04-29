@@ -51,141 +51,149 @@ class _HomeViewState extends State<HomeView> {
       value: BlocProvider.of<TopUsersBloc>(context)..add(GetTopUsers()),
       child: BlocProvider.value(
         value: BlocProvider.of<FoodByRadiusBloc>(context)..add(GetFoodByRadius()),
-        child: SafeArea(
-          top: true,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 3.w),
-              child: Center(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    SizedBox(height: 7.h,),
-                    Align(
-                      alignment: Alignment.topLeft,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            width: 70.w,
-                            child: Text(
-                              "Na co masz dzisiaj ochotę, ${user.displayName!}?",
-                              style: TextStyle(
-                                color: foodBlueGreen,
-                                fontSize: 20.sp,
-                                fontWeight: FontWeight.bold,
+        child: RefreshIndicator(
+          onRefresh: () async{
+            setState(() {
+
+            });
+          },
+          color: foodBlueGreen,
+          child: SafeArea(
+            top: true,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 3.w),
+                child: Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(height: 7.h,),
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              width: 70.w,
+                              child: Text(
+                                "Na co masz dzisiaj ochotę, ${user.displayName!}?",
+                                style: TextStyle(
+                                  color: foodBlueGreen,
+                                  fontSize: 20.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                          Icon(
-                            LineIcons.utensils,
-                            color: foodBlueGreen,
-                            size: 50,
-                          )
-                        ],
+                            Icon(
+                              LineIcons.utensils,
+                              color: foodBlueGreen,
+                              size: 50,
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 3.h),
-                        child: Text(
-                          "Polecane:",
-                          style: TextStyle(
-                            color: foodOrange,
-                            fontSize: 15.sp,
-                            letterSpacing: 2,
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 3.h),
+                          child: Text(
+                            "Polecane:",
+                            style: TextStyle(
+                              color: foodOrange,
+                              fontSize: 15.sp,
+                              letterSpacing: 2,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Container(
-                      height: 30.h,
-                      child: BlocBuilder<FoodByRadiusBloc, FoodByRadiusState>(
-                        builder: (context, state) {
-                          if(state is FoodByRadiusDone){
-                           return ListView.builder(
-                             scrollDirection: Axis.horizontal,
-                             itemCount: state.foods!.length > 5 ? 5 : state.foods!.length,
-                             itemBuilder: (BuildContext context, int index){
-                               return FoodTile(food: state.foods![index]);
-                             },
-                           );
-                          }else{
-                            return SpinKitCircle(
-                              color: foodBlueGreen,
-                            );
+                      Container(
+                        height: 30.h,
+                        child: BlocBuilder<FoodByRadiusBloc, FoodByRadiusState>(
+                          builder: (context, state) {
+                            if(state is FoodByRadiusDone){
+                             return ListView.builder(
+                               scrollDirection: Axis.horizontal,
+                               itemCount: state.foods!.length > 5 ? 5 : state.foods!.length,
+                               itemBuilder: (BuildContext context, int index){
+                                 return FoodTile(food: state.foods![index]);
+                               },
+                             );
+                            }else{
+                              return SpinKitCircle(
+                                color: foodBlueGreen,
+                              );
+                            }
                           }
-                        }
+                        ),
                       ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 3.h),
-                        child: Text(
-                          "Top użytkownicy:",
-                          style: TextStyle(
-                            color: foodOrange,
-                            fontSize: 15.sp,
-                            letterSpacing: 2,
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 3.h),
+                          child: Text(
+                            "Top użytkownicy:",
+                            style: TextStyle(
+                              color: foodOrange,
+                              fontSize: 15.sp,
+                              letterSpacing: 2,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Container(
-                      height: 30.h,
-                      child: BlocBuilder<TopUsersBloc, TopUsersState>(
-                        builder: (context, state) {
-                          if(state is TopUsersDone){
-                            return ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: state.users!.length > 5 ? 5 : state.users!.length,
-                              itemBuilder: (BuildContext context, int index){
-                                return TopUserWidget(user: state.users![index]);
-                              },
-                            );
-                          }else{
-                            return SpinKitCircle(
-                              color: foodBlueGreen,
-                            );
+                      Container(
+                        height: 30.h,
+                        child: BlocBuilder<TopUsersBloc, TopUsersState>(
+                          builder: (context, state) {
+                            if(state is TopUsersDone){
+                              return ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: state.users!.length > 5 ? 5 : state.users!.length,
+                                itemBuilder: (BuildContext context, int index){
+                                  return TopUserWidget(user: state.users![index]);
+                                },
+                              );
+                            }else{
+                              return SpinKitCircle(
+                                color: foodBlueGreen,
+                              );
+                            }
                           }
-                        }
+                        ),
                       ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 3.h),
-                        child: Text(
-                          "Dla Ciebie:",
-                          style: TextStyle(
-                            color: foodOrange,
-                            fontSize: 15.sp,
-                            letterSpacing: 2,
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 3.h),
+                          child: Text(
+                            "Dla Ciebie:",
+                            style: TextStyle(
+                              color: foodOrange,
+                              fontSize: 15.sp,
+                              letterSpacing: 2,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    BlocBuilder<FoodByRadiusBloc, FoodByRadiusState>(
-                        builder: (context, state) {
-                          if(state is FoodByRadiusDone){
-                            return GridView.count(
-                              physics: NeverScrollableScrollPhysics(),
-                              shrinkWrap: true,
-                              padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-                              crossAxisSpacing: 1.w,
-                              crossAxisCount: 2,
-                              children: state.foods!.map((e) => FoodTile(food: e)).toList()
-                            );
-                          }else{
-                            return SpinKitCircle(
-                              color: foodBlueGreen,
-                            );
+                      BlocBuilder<FoodByRadiusBloc, FoodByRadiusState>(
+                          builder: (context, state) {
+                            if(state is FoodByRadiusDone){
+                              return GridView.count(
+                                physics: NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                                crossAxisSpacing: 1.w,
+                                crossAxisCount: 2,
+                                children: state.foods!.map((e) => FoodTile(food: e)).toList()
+                              );
+                            }else{
+                              return SpinKitCircle(
+                                color: foodBlueGreen,
+                              );
+                            }
                           }
-                        }
-                    ),
-                  ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

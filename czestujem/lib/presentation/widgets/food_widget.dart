@@ -86,52 +86,51 @@ class _FoodTileState extends State<FoodTile> {
                               Flexible(
                                 child: InkWell(
                                   onTap: (){
-                                    Navigator.of(usernameBlocContext).push(MaterialPageRoute(builder: (BuildContext context) => FoodView(food: food, context: usernameBlocContext,)));
+                                    Navigator.push(context, _createAnimatedRouteRight(FoodView(food: food, context: usernameBlocContext)));
+                                    //_createAnimatedRouteRight(FoodView(food: food, context: usernameBlocContext));
+                                    //Navigator.of(usernameBlocContext).push(MaterialPageRoute(builder: (BuildContext context) => FoodView(food: food, context: usernameBlocContext,)));
                                   },
-                                  child: Hero(
-                                    tag: food.id,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      height: 25.h,
-                                      width: 40.h,
-                                      child: food.photoURL != '' ?
-                                      Stack(
-                                        fit: StackFit.expand,
-                                        children:[
-                                          ClipRRect(
-                                            borderRadius: BorderRadius.circular(20),
-                                            child: Image.network(food.photoURL, fit: BoxFit.cover)),
-                                          Positioned(
-                                            right: 6,
-                                            top: 6,
-                                            child: Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              mainAxisAlignment: MainAxisAlignment.end,
-                                              children: [
-                                                _buildLikeHeart(usernameBlocContext)
-                                              ],
-                                            ),
-                                          )
-                                        ]
-                                      ) : Stack(
-                                            fit: StackFit.expand,
-                                            children: [
-                                              Icon(LineIcons.camera, size: 40,),
-                                              Positioned(
-                                                right: 6,
-                                                top: 6,
-                                                child: Row(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  mainAxisAlignment: MainAxisAlignment.end,
-                                                  children: [
-                                                    _buildLikeHeart(usernameBlocContext)
-                                                  ],
-                                                ),
-                                              )
-                                      ]),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20),
                                     ),
+                                    height: 25.h,
+                                    width: 40.h,
+                                    child: food.photoURL != '' ?
+                                    Stack(
+                                      fit: StackFit.expand,
+                                      children:[
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(20),
+                                          child: Image.network(food.photoURL, fit: BoxFit.cover)),
+                                        Positioned(
+                                          right: 6,
+                                          top: 6,
+                                          child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            children: [
+                                              _buildLikeHeart(usernameBlocContext)
+                                            ],
+                                          ),
+                                        )
+                                      ]
+                                    ) : Stack(
+                                          fit: StackFit.expand,
+                                          children: [
+                                            Icon(LineIcons.camera, size: 40,),
+                                            Positioned(
+                                              right: 6,
+                                              top: 6,
+                                              child: Row(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                children: [
+                                                  _buildLikeHeart(usernameBlocContext)
+                                                ],
+                                              ),
+                                            )
+                                    ]),
                                   ),
                                 ),
                               ),
@@ -255,6 +254,23 @@ class _FoodTileState extends State<FoodTile> {
             ),
           );
         }
+      },
+    );
+  }
+
+  static Route<dynamic> _createAnimatedRouteRight(Widget view) {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => view,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(1.0, 0);
+        const end = Offset(0, 0);
+        const curve = Curves.ease;
+        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        final offsetAnimation = animation.drive(tween);
+        return SlideTransition(
+          position: offsetAnimation,
+          child: child,
+        );
       },
     );
   }

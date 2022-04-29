@@ -1,5 +1,6 @@
 import 'package:czestujem/presentation/blocs/conversation_users_bloc/conversation_users_bloc.dart';
 import 'package:czestujem/presentation/blocs/favourite_bloc/favourite_bloc.dart';
+import 'package:czestujem/presentation/blocs/food_bloc/delete_food_bloc.dart';
 import 'package:czestujem/presentation/blocs/food_bloc/food_bloc.dart';
 import 'package:czestujem/presentation/blocs/fridge_bloc/fridge_bloc.dart';
 import 'package:czestujem/presentation/blocs/get_users_to_rate_bloc/get_users_to_rate_bloc.dart';
@@ -96,6 +97,9 @@ Future<void> main() async{
       ),
       BlocProvider(
           create: (_) => injector<RateUserBloc>()
+      ),
+      BlocProvider(
+          create: (_) => injector<DeleteFoodBloc>()
       ),
     ],
     child: MyApp())

@@ -22,6 +22,7 @@ class FoodBloc extends Bloc<FoodEvent, FoodState> {
       await _addFoodUseCase(params: params);
       emit(FoodDone());
     }catch(e){
+      print(e);
       emit(FoodError());
     }
   }

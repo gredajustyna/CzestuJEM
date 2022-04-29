@@ -3,6 +3,7 @@ import 'package:czestujem/presentation/blocs/register_bloc/register_bloc.dart';
 import 'package:czestujem/presentation/blocs/register_bloc/register_event.dart';
 import 'package:czestujem/presentation/blocs/register_bloc/register_state.dart';
 import 'package:czestujem/presentation/widgets/register_widgets/register_background.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -312,13 +313,39 @@ class _RegisterBodyState extends State<RegisterBody> {
                       alignment: Alignment.centerRight,
                       child: ElevatedButton(
                         onPressed: () {
-                          if(passwordController.text == comfirmPasswordController.text){
-                            Map<String, String> params = {'email':emailController.text, 'password' : passwordController.text, 'name': nameController.text};
-                            BlocProvider.of<RegisterBloc>(context).add(Register(params));
+                          if(nameController.text.length <20 && nameController.text.length>0){
+                            if(EmailValidator.validate(emailController.text)){
+                              if(passwordController.text == comfirmPasswordController.text){
+                                Map<String, String> params = {'email':emailController.text, 'password' : passwordController.text, 'name': nameController.text};
+                                BlocProvider.of<RegisterBloc>(context).add(Register(params));
+                              }else{
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Hasła muszą być takie same!',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      duration: Duration(milliseconds: 750),
+                                      backgroundColor: foodOrange,
+                                    ));
+                              }
+                            }else{
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Podaj poprawny adres email!',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    duration: Duration(milliseconds: 750),
+                                    backgroundColor: foodOrange,
+                                  ));
+                            }
                           }else{
                             ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Hasła muszą być takie same!',
+                                  content: Text('Nazwa powinna mieć od 1 do 20 znaków!',
                                     style: TextStyle(
                                       color: Colors.white,
                                     ),

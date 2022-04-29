@@ -40,3 +40,24 @@ class SendMessageDone extends SendMessageState{
 class SendMessageError extends SendMessageState{
   const SendMessageError();
 }
+
+abstract class GetLastMessageState{
+  final Message? lastMessage;
+  const GetLastMessageState({this.lastMessage});
+}
+
+class GetLastMessageInitial extends GetLastMessageState{
+  const GetLastMessageInitial();
+}
+
+class GetLastMessageLoading extends GetLastMessageState{
+  const GetLastMessageLoading();
+}
+
+class GetLastMessageDone extends GetLastMessageState{
+  const GetLastMessageDone(Message message): super(lastMessage: message);
+}
+
+class GetLastMessageError extends GetLastMessageState{
+  const GetLastMessageError();
+}

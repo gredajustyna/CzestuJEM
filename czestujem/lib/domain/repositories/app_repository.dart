@@ -56,4 +56,10 @@ abstract class AppRepository{
   Future<void> rateUser(FireUser user, double mark);
 
   Future<void> deleteFood(Food food);
+
+  Future<Message> getLastMessage(FireUser user);
+
+  Future<void> deleteRate(FireUser user);
+
+  Future<void> readMessages(FireUser user);
 }

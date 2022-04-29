@@ -23,6 +23,7 @@ class ChatListView extends StatefulWidget {
 }
 
 class _ChatListViewState extends State<ChatListView> {
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(

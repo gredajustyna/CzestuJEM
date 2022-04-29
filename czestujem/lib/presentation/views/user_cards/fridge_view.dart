@@ -1,3 +1,5 @@
+import 'package:czestujem/presentation/blocs/food_bloc/delete_food_bloc.dart';
+import 'package:czestujem/presentation/blocs/food_bloc/delete_food_state.dart';
 import 'package:czestujem/presentation/blocs/fridge_bloc/fridge_bloc.dart';
 import 'package:czestujem/presentation/blocs/fridge_bloc/fridge_event.dart';
 import 'package:czestujem/presentation/blocs/fridge_bloc/fridge_state.dart';
@@ -26,23 +28,32 @@ class _FridgeViewState extends State<FridgeView> {
       child: Scaffold(
         backgroundColor: Colors.grey[100],
         appBar: _buildAppbar(),
-        body: BlocBuilder<GetFridgeBloc, FridgeState>(
-          builder: (context, state){
-            if(state is FridgeDone){
-              return GridView.count(
-                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-                  crossAxisSpacing: 1.w,
-                  crossAxisCount: 2,
-                  children: state.fridge!.map((e) => FoodTile(food: e)).toList()
-              );
-            }else{
-              return Center(
-                child: SpinKitCircle(
-                  color: foodBlueGreen,
-                ),
-              );
-            }
+        body: BlocListener<DeleteFoodBloc, DeleteFoodState>(
+          listener: (context, state) {
+           if(state is DeleteFoodDone){
+             setState(() {
+
+             });
+           }
           },
+          child: BlocBuilder<GetFridgeBloc, FridgeState>(
+            builder: (context, state){
+              if(state is FridgeDone){
+                return GridView.count(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                    crossAxisSpacing: 1.w,
+                    crossAxisCount: 2,
+                    children: state.fridge!.map((e) => FoodTile(food: e)).toList()
+                );
+              }else{
+                return Center(
+                  child: SpinKitCircle(
+                    color: foodBlueGreen,
+                  ),
+                );
+              }
+            },
+          ),
         ),
       ),
     );

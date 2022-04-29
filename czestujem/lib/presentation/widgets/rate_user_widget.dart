@@ -57,7 +57,9 @@ class _RateUserWidgetState extends State<RateUserWidget> {
                 ),
               ),
               IconButton(
-                onPressed: (){},
+                onPressed: (){
+                  _showDeleteDialog();
+                },
                 icon:Icon(LineIcons.times, color: foodGrey,)
               ),
             ],
@@ -119,6 +121,64 @@ class _RateUserWidgetState extends State<RateUserWidget> {
           )
         ],
       ),
+    );
+  }
+
+  Future<void> _showDeleteDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Text("Czy jesteś pewien, że nie chcesz ocenić użytkownika: ${user.name}?",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: foodBlueGreen,
+                    ),
+                  ),
+                  Text("Oceniając użytkowników pomagasz budować zaufanie między członkami jedzeniowej społeczności!",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: foodBlueGreen,
+                    ),
+                  ),
+                ],
+              )
+          ),
+          actions: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  child: const Text('Usuwam!',
+                    style: TextStyle(
+                        color: foodBlueGreen
+                    ),
+                  ),
+                  onPressed: () async{
+                    BlocProvider.of<RateUserBloc>(context).add(DeleteRate(user));
+                    Navigator.of(context).pop();
+                  },
+                ),
+                //),
+                TextButton(
+                  child: const Text('Anuluj',
+                    style: TextStyle(
+                        color: foodOrange
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 

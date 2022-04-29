@@ -161,6 +161,22 @@ class AppRepositoryImpl implements AppRepository{
     await FireBase.deleteFood(food);
   }
 
+  @override
+  Future<Message> getLastMessage(FireUser user) async {
+    var result = await FireBase.getLastMessage(user);
+    return result;
+  }
+
+  @override
+  Future<void> deleteRate(FireUser user) async{
+    await FireBase.deleteRate(user);
+  }
+
+  @override
+  Future<void> readMessages(FireUser user) async{
+    await FireBase.readMessages(user);
+  }
+
 
 
 }

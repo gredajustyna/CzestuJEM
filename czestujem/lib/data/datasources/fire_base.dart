@@ -10,6 +10,8 @@ import 'package:czestujem/domain/entities/reservation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:location/location.dart';
+import 'package:uuid/uuid.dart';
+
 
 class FireBase{
   static Future<dynamic> getChatsList({required String uid}){
@@ -61,13 +63,14 @@ class FireBase{
     return user;
   }
   
-  static Future<dynamic> addFood(String foodFileName, File foodImageFile, Food food) async{
+  static Future<dynamic> addFood(dynamic foodFileName, dynamic foodImageFile, Food food) async{
     if(food.photoURL =='1'){
-      var uploadTask = await FirebaseStorage.instance.ref(foodFileName).putFile(foodImageFile).whenComplete(() async =>
+      var uploadTask = await FirebaseStorage.instance.ref(foodFileName).putFile(foodImageFile!).whenComplete(() async =>
       food.photoURL = await FirebaseStorage.instance.ref(foodFileName).getDownloadURL(),
       );
+    }else{
+      await FirebaseFirestore.instance.collection('foodCollection').add(food.toJson()).catchError((e){return 1;});
     }
-    await FirebaseFirestore.instance.collection('foodCollection').add(food.toJson()).catchError((e){return 1;});
   }
 
   static Future<void> deleteFood(Food food) async{
@@ -280,9 +283,30 @@ class FireBase{
     var snapFoods = await messages.get();
     var temp = snapFoods.docs.map((e) => Message.fromJson(e.data() as Map<String, dynamic>)).toList();
     temp.sort((a,b) => a.sent.compareTo(b.sent));
-    print(temp);
-    print(temp.reversed.toList());
     return temp.reversed.toList();
+  }
+
+  static Future<dynamic> getLastMessage(FireUser user) async{
+    CollectionReference chats = FirebaseFirestore.instance.collection("chats");
+    String docId = await getConversationDocId(user);
+    CollectionReference messages = chats.doc(docId).collection("messages");
+    var snapFoods = await messages.get();
+    var temp = snapFoods.docs.map((e) => Message.fromJson(e.data() as Map<String, dynamic>)).toList();
+    temp.sort((a,b) => a.sent.compareTo(b.sent));
+    var last = temp.last;
+    //var lastMessage = snapFoods.docs.last;
+    //var last = Message.fromJson(lastMessage.data() as Map<String, dynamic>);
+    return last;
+  }
+
+  static Future<void> readMessages(FireUser user) async{
+    CollectionReference chats = FirebaseFirestore.instance.collection("chats");
+    String docId = await getConversationDocId(user);
+    CollectionReference messages = chats.doc(docId).collection("messages");
+    var snapFoods = await messages.get();
+    Future.forEach(snapFoods.docs, (QueryDocumentSnapshot element) async{
+      await element.reference.update({'seen' : true});
+    });
   }
 
 
@@ -295,19 +319,25 @@ class FireBase{
 
   static Future<void> updateFoodStatus(Food food, String status) async{
     var documentReference = await FirebaseFirestore.instance.collection("foodCollection").where('id', isEqualTo: food.id).get();
-    documentReference.docs.forEach((element) async{
+    Future.forEach(documentReference.docs, (QueryDocumentSnapshot element) async{
       await element.reference.update({'status' : status});
     });
-    //     .then((value) =>
-    //   value.docs.map((e) =>  FirebaseFirestore.instance.collection("foodCollection").doc(e.id).update({'status' : status}))
-    // );
-    //await documentReference.docs.single.reference.update({'status' : status});
+    // documentReference.docs.forEach((element) async{
+    //   await element.reference.update({'status' : status});
+    // });
+
   }
 
-  static Future<void> reserveFood(Food food, FireUser user) async{
+  static Future<String> reserveFood(Food food, FireUser user) async{
     Message message = Message('Witaj, jestem zainteresowana/y porcją: ${food.name}. Kiedy możemy się spotkać?', DateTime.now(), FirebaseAuth.instance.currentUser!.uid, false);
     await FireBase.sendMessage(message, user);
     await FireBase.updateFoodStatus(food, 'zarezerwowane');
+    var resDoc = FirebaseFirestore.instance.collection('reservationsCollection').doc(FirebaseAuth.instance.currentUser!.uid).collection('food').doc(food.id);
+    print('The resDoc id is ${resDoc.id}');
+    resDoc.set({'id' : food.id, 'date' : Timestamp.fromDate(DateTime.now())});
+    return '1';
+    //var res = Reservation(food, resId.toString(), DateTime.now());
+    //await resDoc.set({'id' : resId.toString(), 'date' : Timestamp.fromDate(DateTime.now())});
   }
 
 
@@ -349,9 +379,15 @@ class FireBase{
     await usersToRateDoc.update({user.uid : FieldValue.delete()});
   }
 
+  static Future<void> deleteRate(FireUser user) async{
+    var usersToRateDoc = FirebaseFirestore.instance.collection('usersToRateCollection').doc(FirebaseAuth.instance.currentUser!.uid);
+    await usersToRateDoc.update({user.uid : FieldValue.delete()});
+  }
+
   static Future<void> deleteReservation(Reservation reservation) async{
     Message message = Message('Witaj, porcja: ${reservation.food.name} jest jednak niedostępna. Przepraszam za kłopot.', DateTime.now(), FirebaseAuth.instance.currentUser!.uid, false);
-
+    await updateFoodStatus(reservation.food, "dostępne");
+    
   }
 
 }

@@ -17,3 +17,7 @@ class RateUserDone extends RateUserState{
 class RateUserError extends RateUserState{
   const RateUserError();
 }
+
+class RateUserDeleted extends RateUserState{
+  const RateUserDeleted();
+}

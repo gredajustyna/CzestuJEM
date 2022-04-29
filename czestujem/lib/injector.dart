@@ -3,10 +3,13 @@ import 'package:czestujem/domain/repositories/app_repository.dart';
 import 'package:czestujem/domain/usecases/add_food_usecase.dart';
 import 'package:czestujem/domain/usecases/add_to_favourites_usecase.dart';
 import 'package:czestujem/domain/usecases/check_if_favourite_usecase.dart';
+import 'package:czestujem/domain/usecases/delete_food_usecase.dart';
+import 'package:czestujem/domain/usecases/delete_rate_usecase.dart';
 import 'package:czestujem/domain/usecases/get_all_favourites_usecase.dart';
 import 'package:czestujem/domain/usecases/get_all_messages_usecase.dart';
 import 'package:czestujem/domain/usecases/get_conversation_users_usecase.dart';
 import 'package:czestujem/domain/usecases/get_food_by_radius_usecase.dart';
+import 'package:czestujem/domain/usecases/get_last_message_usecase.dart';
 import 'package:czestujem/domain/usecases/get_my_food_usecase.dart';
 import 'package:czestujem/domain/usecases/get_rating_usecase.dart';
 import 'package:czestujem/domain/usecases/get_top_users_usecase.dart';
@@ -15,6 +18,7 @@ import 'package:czestujem/domain/usecases/get_username_from_uid_usecase.dart';
 import 'package:czestujem/domain/usecases/get_users_to_rate_usecase.dart';
 import 'package:czestujem/domain/usecases/login_usecase.dart';
 import 'package:czestujem/domain/usecases/rate_user_usecase.dart';
+import 'package:czestujem/domain/usecases/read_messages_usecase.dart';
 import 'package:czestujem/domain/usecases/register_usecase.dart';
 import 'package:czestujem/domain/usecases/remove_from_favourites_usecase.dart';
 import 'package:czestujem/domain/usecases/reserve_food_usecase.dart';
@@ -24,6 +28,7 @@ import 'package:czestujem/domain/usecases/send_message_usecase.dart';
 import 'package:czestujem/domain/usecases/update_user_data_usecase.dart';
 import 'package:czestujem/presentation/blocs/conversation_users_bloc/conversation_users_bloc.dart';
 import 'package:czestujem/presentation/blocs/favourite_bloc/favourite_bloc.dart';
+import 'package:czestujem/presentation/blocs/food_bloc/delete_food_bloc.dart';
 import 'package:czestujem/presentation/blocs/food_bloc/food_bloc.dart';
 import 'package:czestujem/presentation/blocs/fridge_bloc/fridge_bloc.dart';
 import 'package:czestujem/presentation/blocs/get_user_bloc/get_user_bloc.dart';
@@ -72,6 +77,10 @@ Future<void> initializeDependencies() async {
   injector.registerSingleton<ReserveFoodUseCase>(ReserveFoodUseCase(injector()));
   injector.registerSingleton<GetUsersToRateUseCase>(GetUsersToRateUseCase(injector()));
   injector.registerSingleton<RateUserUseCase>(RateUserUseCase(injector()));
+  injector.registerSingleton<DeleteFoodUseCase>(DeleteFoodUseCase(injector()));
+  injector.registerSingleton<GetLastMessageUseCase>(GetLastMessageUseCase(injector()));
+  injector.registerSingleton<DeleteRateUseCase>(DeleteRateUseCase(injector()));
+  injector.registerSingleton<ReadMessagesUseCase>(ReadMessagesUseCase(injector()));
 
   //blocs
   injector.registerFactory<LoginBloc>(() => LoginBloc(injector()));
@@ -89,11 +98,13 @@ Future<void> initializeDependencies() async {
   injector.registerFactory<TopUsersBloc>(() => TopUsersBloc(injector()));
   injector.registerFactory<SearchBloc>(() => SearchBloc(injector()));
   injector.registerFactory<ConversationUsersBloc>(() => ConversationUsersBloc(injector()));
-  injector.registerFactory<MessagesBloc>(() => MessagesBloc(injector(), injector()));
+  injector.registerFactory<MessagesBloc>(() => MessagesBloc(injector(), injector(), injector()));
   injector.registerFactory<GetUserBloc>(() => GetUserBloc(injector()));
   injector.registerFactory<ReserveFoodBloc>(() => ReserveFoodBloc(injector()));
   injector.registerFactory<GetUsersToRateBloc>(() => GetUsersToRateBloc(injector()));
-  injector.registerFactory<RateUserBloc>(() => RateUserBloc(injector()));
+  injector.registerFactory<RateUserBloc>(() => RateUserBloc(injector(), injector()));
+  injector.registerFactory<DeleteFoodBloc>(() => DeleteFoodBloc(injector()));
+  injector.registerFactory<GetLastMessageBloc>(() => GetLastMessageBloc(injector()));
 }
 
 Future<FirebaseApp> _initializeFirebase() async {

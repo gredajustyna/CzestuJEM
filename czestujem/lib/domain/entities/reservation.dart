@@ -6,4 +6,5 @@ class Reservation{
   DateTime time;
 
   Reservation(this.food, this.id, this.time);
+
 }

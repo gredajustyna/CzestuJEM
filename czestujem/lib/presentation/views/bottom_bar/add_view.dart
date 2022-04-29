@@ -167,14 +167,6 @@ class _AddViewState extends State<AddView> {
                     ),
                   ],
                 ),
-                RawMaterialButton(
-                  onPressed: () async{
-                    var uuid = Uuid();
-                    await FireBase.addFood(fileName, imageFile, new Food('', 'pizzka', 'dobra pizzka fajm', GeoPoint(globals.location.latitude, globals.location.longitude), 'food', DateTime.now(), FirebaseAuth.instance.currentUser!.uid, uuid.v1(), 'dostępne'));
-                    //await FirebaseStorage.instance.ref(fileName).putFile(imageFile);
-                  },
-                  child: Text('wgraj'),
-                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Container(
@@ -421,8 +413,8 @@ class _AddViewState extends State<AddView> {
                                 globals.categories[globals.selectedCategories.indexOf(true)],
                                 date, FirebaseAuth.instance.currentUser!.uid, uuid.v1(), 'dostępne');
                             Map<String, dynamic> foodToAdd = {
-                              'foodFileName' : fileName,
-                              'foodImageFile' : imageFile,
+                              'foodFileName' : '',
+                              'foodImageFile' : File(''),
                               'food' : food
                             };
                             BlocProvider.of<FoodBloc>(context).add(AddFood(foodToAdd));

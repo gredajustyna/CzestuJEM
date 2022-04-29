@@ -77,7 +77,23 @@ class _RateUsersViewState extends State<RateUsersView> {
              );
            }else if(state is RateUserLoading){
              context.loaderOverlay.show();
+           }else if(state is RateUserDeleted){
+             context.loaderOverlay.hide();
+             ScaffoldMessenger.of(context).showSnackBar(
+                 SnackBar(
+                   content: Text('Pomyślnie usunięto!',
+                     style: TextStyle(
+                       color: Colors.white,
+                     ),
+                   ),
+                   duration: Duration(milliseconds: 750),
+                   backgroundColor: foodBlueGreen,
+                 )
+             );
            }
+           setState(() {
+
+           });
           },
           child: LoaderOverlay(
             overlayColor: foodLightBlue,

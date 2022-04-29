@@ -106,69 +106,144 @@ class _UserChatViewState extends State<UserChatView> {
 
   Widget _buildChat(){
     return Scaffold(
-      bottomNavigationBar: _buildBottomBar(),
+      //bottomNavigationBar: _buildBottomBar(),
         backgroundColor: Colors.grey[100],
         appBar: _buildAppbar(),
-      body: FutureBuilder(
-        future: FireBase.getConversationDocId(user),
-        builder: (BuildContext context, AsyncSnapshot snap){
-          if(snap.hasData){
-            return StreamBuilder(
-                stream: FirebaseFirestore.instance.collection("chats").doc(snap.data).collection("messages").orderBy("sent", descending: true).snapshots(),
-                builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
-                  if(snapshot.hasData){
-                    return ListView(
-                      reverse: true,
-                      children: snapshot.data!.docs.map((DocumentSnapshot document) {
-                        bool isSender = document.get('from') == FirebaseAuth.instance.currentUser!.uid;
-                        var data = document.data()!;
-                        var message = document.data;
-                        print(document.toString());
-                        //print(data['message']);
-                        return Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 1.h, vertical: 1.h),
-                          child: ChatBubble(
-                            clipper: isSender ? ChatBubbleClipper1(type: BubbleType.sendBubble) : ChatBubbleClipper1(type: BubbleType.receiverBubble),
-                            backGroundColor: isSender ? foodBlueGreen : foodGrey,
-                            alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
-                            child: Column(
-                              children: [
-                                Text(document.get('content'),
-                                  style: TextStyle(
-                                    color: Colors.white,
+      body: BlocProvider.value(
+        value: BlocProvider.of<MessagesBloc>(context)..add(ReadMessages(user)),
+        child: Column(
+          children: [
+            Expanded(
+              flex: 20,
+              child: FutureBuilder(
+                future: FireBase.getConversationDocId(user),
+                builder: (BuildContext context, AsyncSnapshot snap){
+                  if(snap.hasData){
+                    return StreamBuilder(
+                        stream: FirebaseFirestore.instance.collection("chats").doc(snap.data).collection("messages").orderBy("sent", descending: true).snapshots(),
+                        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot){
+                          if(snapshot.hasData){
+                            return ListView(
+                              reverse: true,
+                              children: snapshot.data!.docs.map((DocumentSnapshot document) {
+                                bool isSender = document.get('from') == FirebaseAuth.instance.currentUser!.uid;
+                                var data = document.data()!;
+                                var message = document.data;
+                                print(document.toString());
+                                print(document.get('sent').toDate().hour);
+                                //print(data['message']);
+                                return Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 1.h, vertical: 1.h),
+                                  child: ChatBubble(
+                                    clipper: isSender ? ChatBubbleClipper1(type: BubbleType.sendBubble) : ChatBubbleClipper1(type: BubbleType.receiverBubble),
+                                    backGroundColor: isSender ? foodBlueGreen : foodGrey,
+                                    alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
+                                    child: Column(
+                                      children: [
+                                        Text(document.get('content'),
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        Text(document.get('sent').toDate().hour == 0 ? DateFormat('kk:mm').format(document.get('sent').toDate()).replaceRange(0,2,'00') : DateFormat('kk:mm').format(document.get('sent').toDate()),
+                                          textAlign: TextAlign.right,
+                                          style: TextStyle(
+                                              fontSize: 10.sp,
+                                              color: Colors.grey[400]
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                Text(DateFormat('kk:mm').format(document.get('sent').toDate()),
-                                  textAlign: TextAlign.right,
-                                  style: TextStyle(
-                                      fontSize: 10.sp,
-                                      color: Colors.grey[400]
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }).toList(),
+                                );
+                              }).toList(),
+                            );
+                          }
+                          else{
+                            return Center(
+                              child: SpinKitCircle(
+                                color: foodBlueGreen,
+                              ),
+                            );
+                          }
+                        }
                     );
-                  }
-                  else{
+                  }else{
                     return Center(
                       child: SpinKitCircle(
                         color: foodBlueGreen,
                       ),
                     );
                   }
-                }
-            );
-          }else{
-            return Center(
-              child: SpinKitCircle(
-                color: foodBlueGreen,
+                },
               ),
-            );
-          }
-        },
+            ),
+            Expanded(
+              flex: 3,
+              child: Row(
+                children: [
+                  IconButton(
+                      onPressed: (){
+                        Message message = new Message(_messageController.text, DateTime.now(), FirebaseAuth.instance.currentUser!.uid, false);
+                        Map<String, dynamic> messageMap = {'message' : message, 'user': user};
+                        BlocProvider.of<MessagesBloc>(context).add(SendMessage(messageMap));
+                        _messageController.clear();
+                        //FireBase.sendMessage(message, user);
+                      },
+                      icon: Icon(LineIcons.paperPlane, color: foodGrey,)),
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 1.w),
+                    child: Container(
+                      width: 80.w,
+                      child: Theme(
+                        data: ThemeData(
+                          colorScheme: ThemeData().colorScheme.copyWith(
+                            primary: foodBlueGreen,
+                          ),
+                          fontFamily: GoogleFonts.montserrat().fontFamily,
+                        ),
+                        child: TextFormField(
+                          //EDIT TEXT CONTROLLER
+                          decoration: InputDecoration(
+                            floatingLabelStyle: TextStyle(
+                              color: foodBlueGreen,
+                            ),
+                            fillColor: foodLightBlue,
+                            labelText: "Napisz wiadomość",
+                            //prefixIcon: Icon(LineIcons.envelope, size: 24),
+                            focusColor: foodBlueGreen,
+                            contentPadding: EdgeInsets.symmetric(vertical: 1.w, horizontal: 1.w),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25),
+                              borderSide: BorderSide(
+                                color: foodGrey,
+                                width: 2.0,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25),
+                              borderSide: BorderSide(
+                                color: foodBlueGreen,
+                                width: 2.0,
+                              ),
+                            ),
+                          ),
+                          controller: _messageController,
+                          style: TextStyle(
+                            color: foodGrey,
+                          ),
+                          onFieldSubmitted: (String value){
+
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

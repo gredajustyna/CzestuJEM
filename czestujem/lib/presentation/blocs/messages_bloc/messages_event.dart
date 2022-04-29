@@ -14,3 +14,11 @@ class GetAllMessages extends MessagesEvent{
 class SendMessage extends MessagesEvent{
   const SendMessage(Map<String, dynamic>? message) : super(message: message);
 }
+
+class GetLastMessage extends MessagesEvent{
+  const GetLastMessage(FireUser user):super(user: user);
+}
+
+class ReadMessages extends MessagesEvent{
+  const ReadMessages(FireUser user) : super(user: user);
+}
