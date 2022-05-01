@@ -1,4 +1,6 @@
+import 'package:czestujem/presentation/blocs/confirm_reservstion_bloc/confirm_reservation_bloc.dart';
 import 'package:czestujem/presentation/blocs/conversation_users_bloc/conversation_users_bloc.dart';
+import 'package:czestujem/presentation/blocs/delete_reservation_bloc/delete_reservation_bloc.dart';
 import 'package:czestujem/presentation/blocs/favourite_bloc/favourite_bloc.dart';
 import 'package:czestujem/presentation/blocs/food_bloc/delete_food_bloc.dart';
 import 'package:czestujem/presentation/blocs/food_bloc/food_bloc.dart';
@@ -16,6 +18,7 @@ import 'package:czestujem/presentation/blocs/top_users_bloc/top_users_bloc.dart'
 import 'package:czestujem/presentation/blocs/user_data_bloc/user_data_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'config/routes/routes.dart';
 import 'config/themes/themes.dart';
@@ -50,6 +53,7 @@ Future<void> main() async{
   }
   _locationData = await location.getLocation();
   globals.location = _locationData;
+  final prefs = await SharedPreferences.getInstance();
 
   runApp(MultiBlocProvider(
     providers: [
@@ -100,6 +104,12 @@ Future<void> main() async{
       ),
       BlocProvider(
           create: (_) => injector<DeleteFoodBloc>()
+      ),
+      BlocProvider(
+          create: (_) => injector<ConfirmReservationBloc>()
+      ),
+      BlocProvider(
+          create: (_) => injector<DeleteReservationBloc>()
       ),
     ],
     child: MyApp())

@@ -4,6 +4,9 @@ import 'dart:math';
 
 import 'package:czestujem/data/datasources/fire_base.dart';
 import 'package:czestujem/domain/entities/message.dart';
+import 'package:czestujem/presentation/blocs/confirm_reservstion_bloc/confirm_reservation_state.dart';
+import 'package:czestujem/presentation/blocs/delete_reservation_bloc/delete_reservation_bloc.dart';
+import 'package:czestujem/presentation/blocs/delete_reservation_bloc/delete_reservation_event.dart';
 import 'package:czestujem/presentation/blocs/favourite_bloc/favourite_event.dart';
 import 'package:czestujem/presentation/blocs/food_bloc/delete_food_bloc.dart';
 import 'package:czestujem/presentation/blocs/food_bloc/delete_food_event.dart';
@@ -31,6 +34,9 @@ import 'package:czestujem/core/utils/globals.dart' as globals;
 import '../../config/themes/colors.dart';
 import '../../domain/entities/food.dart';
 import '../../injector.dart';
+import '../blocs/confirm_reservstion_bloc/confirm_reservation_bloc.dart';
+import '../blocs/confirm_reservstion_bloc/confirm_reservation_event.dart';
+import '../blocs/delete_reservation_bloc/delete_reservation_state.dart';
 import '../blocs/favourite_bloc/favourite_bloc.dart';
 import '../blocs/favourite_bloc/favourite_state.dart';
 import 'package:intl/intl.dart';
@@ -56,7 +62,7 @@ class FoodView extends StatefulWidget {
 
 class _FoodViewState extends State<FoodView> {
   late Food food;
-  bool? isFave = false;
+  //bool? isFave = false;
   late BuildContext foodContext;
   final DateFormat formatter = DateFormat('dd-MM-yyyy');
   Completer<GoogleMapController> _controller = Completer();
@@ -81,17 +87,8 @@ class _FoodViewState extends State<FoodView> {
       strokeColor: foodBlueGreen,
       strokeWidth: 1,
     )]);
-    checkIfFave();
+    //checkIfFave();
     super.initState();
-  }
-
-  Future<void> checkIfFave() async{
-    bool? result = await FireBase.checkIfFavourite(food);
-    isFave = result;
-    setState(() {
-
-      print(isFave);
-    });
   }
 
   @override
@@ -206,234 +203,304 @@ class _FoodViewState extends State<FoodView> {
                                );
                              }
                             },
-                            child: LoaderOverlay(
-                              overlayColor: foodLightBlue,
-                              overlayWholeScreen: true,
-                              overlayWidget: Center(
-                                child: SpinKitChasingDots(
-                                  color: Colors.white,
-                                  size: 100,
-                                ),
-                              ),
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      height: 30.h,
-                                      child: food.photoURL != '' ?
-                                      Stack(
-                                          fit: StackFit.expand,
-                                          children:[
-                                            ClipRRect(
-                                                borderRadius: BorderRadius.circular(20),
-                                                child: Container(
-                                                  child: Image.network(food.photoURL, fit: BoxFit.cover))),
-                                            Positioned(
-                                              right: 6,
-                                              top: 6,
-                                              child: Row(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                mainAxisAlignment: MainAxisAlignment.end,
-                                                children: [
-                                                  _buildLikeHeart(favouriteBlocContext)
-                                                ],
-                                              ),
-                                            )
-                                          ]
-                                      ) : Stack(
-                                          fit: StackFit.expand,
-                                          children: [
-                                            Icon(LineIcons.camera, size: 40,),
-                                            Positioned(
-                                              right: 6,
-                                              top: 6,
-                                              child: Row(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                mainAxisAlignment: MainAxisAlignment.end,
-                                                children: [
-                                                  _buildLikeHeart(favouriteBlocContext)
-                                                ],
-                                              ),
-                                            )
-                                          ]),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                      child: Text(
-                                        food.name,
-                                        style: const TextStyle(
-                                          fontSize: 25,
-                                          fontWeight: FontWeight.bold,
-                                          color: foodBlueGreen,
-                                          letterSpacing: 2
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Icon(LineIcons.mapMarker,
-                                            size: 15,
-                                            color: foodBlueGreen,
+                            child: BlocListener<DeleteReservationBloc, DeleteReservationState>(
+                              listener: (context, state) {
+                                if(state is DeleteReservationLoading){
+                                  context.loaderOverlay.show();
+                                }else if(state is DeleteReservationDone){
+                                  context.loaderOverlay.hide();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Pomyślnie usunięto rezerwację!',
+                                          style: TextStyle(
+                                            color: Colors.white,
                                           ),
-                                          Text('${calculateDistance(food.location.longitude, food.location.latitude)} km od Ciebie',
+                                        ),
+                                        duration: Duration(milliseconds: 750),
+                                        backgroundColor: foodBlueGreen,
+                                      )
+                                  );
+                                  setState(() {
+
+                                  });
+                                }else if(state is DeleteReservationError){
+                                  context.loaderOverlay.hide();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Ups, coś poszło nie tak!',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        duration: Duration(milliseconds: 750),
+                                        backgroundColor: foodOrange,
+                                      )
+                                  );
+                                }
+                              },
+                              child: BlocListener<ConfirmReservationBloc, ConfirmReservationState>(
+                                listener: (context, state) {
+                                  if(state is ConfirmReservationLoading){
+                                    context.loaderOverlay.show();
+                                  }else if(state is ConfirmReservationDone){
+                                    context.loaderOverlay.hide();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Pomyślnie potwierdzono odbiór!!',
                                             style: TextStyle(
-                                                color: foodBlueGreen
+                                              color: Colors.white,
                                             ),
-                                          )
-                                        ],
-                                      ),
+                                          ),
+                                          duration: Duration(milliseconds: 750),
+                                          backgroundColor: foodBlueGreen,
+                                        )
+                                    );
+                                    Navigator.of(context).pop();
+                                  }else if(state is ConfirmReservationError){
+                                    context.loaderOverlay.hide();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Ups, coś poszło nie tak!',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          duration: Duration(milliseconds: 750),
+                                          backgroundColor: foodOrange,
+                                        )
+                                    );
+                                  }
+                                },
+                                child: LoaderOverlay(
+                                  overlayColor: foodLightBlue,
+                                  overlayWholeScreen: true,
+                                  overlayWidget: Center(
+                                    child: SpinKitChasingDots(
+                                      color: Colors.white,
+                                      size: 100,
                                     ),
-                                    BlocBuilder<GetUserBloc, GetUserState>(
-                                      builder: (context, state) {
-                                        if(state is GetUserDone){
-                                          print(state.user!.photoURL);
-                                          return InkWell(
-                                            onTap: (){
-                                              Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => UserProfileView(user: state.user!)));
-                                            },
-                                            child: Card(
-                                              child: Padding(
-                                                padding: EdgeInsets.all(1.h),
-                                                child: Row(
-                                                  children: [
-                                                    Container(
-                                                      child:  state.user!.photoURL != "" ?
-                                                      CircleAvatar(
-                                                        backgroundImage: NetworkImage(state.user!.photoURL),
-                                                        radius: 30,
-                                                        backgroundColor: Colors.transparent,
-                                                      ) :
-                                                      CircleAvatar(
-                                                        child: Icon(LineIcons.userCircle,
-                                                          size: 60,
-                                                          color: foodBlueGreen,
-                                                        ),
-                                                        radius: 30,
-                                                        backgroundColor: Colors.transparent,
-                                                      ),
-                                                    ),
-                                                    SizedBox(width: 2.w,),
-                                                    Column(
-                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                      mainAxisAlignment: MainAxisAlignment.start,
+                                  ),
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          height: 30.h,
+                                          child: food.photoURL != '' ?
+                                          Stack(
+                                              fit: StackFit.expand,
+                                              children:[
+                                                ClipRRect(
+                                                    borderRadius: BorderRadius.circular(20),
+                                                    child: Container(
+                                                      child: Image.network(food.photoURL, fit: BoxFit.cover))),
+                                                Positioned(
+                                                  right: 6,
+                                                  top: 6,
+                                                  child: Row(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    mainAxisAlignment: MainAxisAlignment.end,
+                                                    children: [
+                                                      _buildLikeHeart(favouriteBlocContext)
+                                                    ],
+                                                  ),
+                                                )
+                                              ]
+                                          ) : Stack(
+                                              fit: StackFit.expand,
+                                              children: [
+                                                Icon(LineIcons.camera, size: 40,),
+                                                Positioned(
+                                                  right: 6,
+                                                  top: 6,
+                                                  child: Row(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    mainAxisAlignment: MainAxisAlignment.end,
+                                                    children: [
+                                                      _buildLikeHeart(favouriteBlocContext)
+                                                    ],
+                                                  ),
+                                                )
+                                              ]),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                          child: Text(
+                                            food.name,
+                                            style: const TextStyle(
+                                              fontSize: 25,
+                                              fontWeight: FontWeight.bold,
+                                              color: foodBlueGreen,
+                                              letterSpacing: 2
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(LineIcons.mapMarker,
+                                                size: 15,
+                                                color: foodBlueGreen,
+                                              ),
+                                              Text('${calculateDistance(food.location.longitude, food.location.latitude)} km od Ciebie',
+                                                style: TextStyle(
+                                                    color: foodBlueGreen
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                        BlocBuilder<GetUserBloc, GetUserState>(
+                                          builder: (context, state) {
+                                            if(state is GetUserDone){
+                                              print(state.user!.photoURL);
+                                              return InkWell(
+                                                onTap: (){
+                                                  Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => UserProfileView(user: state.user!)));
+                                                },
+                                                child: Card(
+                                                  child: Padding(
+                                                    padding: EdgeInsets.all(1.h),
+                                                    child: Row(
                                                       children: [
-                                                        Text(state.user!.name,
-                                                          style: TextStyle(
-                                                          color: foodBlueGreen,
-                                                          fontSize: 15.sp
+                                                        Container(
+                                                          child:  state.user!.photoURL != "" ?
+                                                          CircleAvatar(
+                                                            backgroundImage: NetworkImage(state.user!.photoURL),
+                                                            radius: 30,
+                                                            backgroundColor: Colors.transparent,
+                                                          ) :
+                                                          CircleAvatar(
+                                                            child: Icon(LineIcons.userCircle,
+                                                              size: 60,
+                                                              color: foodBlueGreen,
+                                                            ),
+                                                            radius: 30,
+                                                            backgroundColor: Colors.transparent,
                                                           ),
                                                         ),
-                                                        SizedBox(height: 4,),
-                                                        Row(
+                                                        SizedBox(width: 2.w,),
+                                                        Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          mainAxisAlignment: MainAxisAlignment.start,
                                                           children: [
-                                                            _buildFacesRow(),
-                                                            SizedBox(width: 1.w,),
-                                                            Text(
-                                                              "(${state.user!.timesRated.toString()})",
+                                                            Text(state.user!.name,
                                                               style: TextStyle(
-                                                                color: foodGrey
+                                                              color: foodBlueGreen,
+                                                              fontSize: 15.sp
                                                               ),
+                                                            ),
+                                                            SizedBox(height: 4,),
+                                                            Row(
+                                                              children: [
+                                                                _buildFacesRow(),
+                                                                SizedBox(width: 1.w,),
+                                                                Text(
+                                                                  "(${state.user!.timesRated.toString()})",
+                                                                  style: TextStyle(
+                                                                    color: foodGrey
+                                                                  ),
+                                                                )
+                                                              ],
                                                             )
                                                           ],
                                                         )
                                                       ],
-                                                    )
-                                                  ],
+                                                    ),
+                                                  ),
                                                 ),
+                                              );
+                                            }else{
+                                              return SpinKitCircle(
+                                                color: foodBlueGreen,
+                                              );
+                                            }
+                                        }),
+                                        Card(
+                                          child: Padding(
+                                            padding: EdgeInsets.all(1.h),
+                                            child: Container(
+                                              width: 90.w,
+                                              child: Column(
+                                                children: [
+                                                  Row(
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    children: [
+                                                      Icon(LineIcons.breadSlice,
+                                                        color: foodGrey,
+                                                      ),
+                                                      SizedBox(width: 1.w,),
+                                                      Row(
+                                                        children: [
+                                                          Text('Kategoria: ',
+                                                            style: TextStyle(
+                                                                color: foodGrey
+                                                            ),
+                                                          ),
+                                                          Text('${food.category}',
+                                                            style: TextStyle(
+                                                                color: foodBlueGreen
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    mainAxisAlignment: MainAxisAlignment.start,
+                                                    children: [
+                                                      Icon(LineIcons.calendar,
+                                                        color: foodGrey,
+                                                      ),
+                                                      SizedBox(width: 1.w,),
+                                                      Row(
+                                                        children: [
+                                                          Text('Data ważności: ',
+                                                            style: TextStyle(
+                                                                color: foodGrey
+                                                            ),
+                                                          ),
+                                                          Text('${formatter.format(food.expirationDate)}',
+                                                            style: TextStyle(
+                                                                color: foodBlueGreen
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      )
+                                                    ],
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                          );
-                                        }else{
-                                          return SpinKitCircle(
-                                            color: foodBlueGreen,
-                                          );
-                                        }
-                                    }),
-                                    Card(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(1.h),
-                                        child: Container(
+                                          ),
+                                        ),
+                                        Container(
                                           width: 90.w,
-                                          child: Column(
-                                            children: [
-                                              Row(
-                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                children: [
-                                                  Icon(LineIcons.breadSlice,
-                                                    color: foodGrey,
-                                                  ),
-                                                  SizedBox(width: 1.w,),
-                                                  Row(
-                                                    children: [
-                                                      Text('Kategoria: ',
-                                                        style: TextStyle(
-                                                            color: foodGrey
-                                                        ),
-                                                      ),
-                                                      Text('${food.category}',
-                                                        style: TextStyle(
-                                                            color: foodBlueGreen
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  )
-                                                ],
-                                              ),
-                                              Row(
-                                                mainAxisAlignment: MainAxisAlignment.start,
-                                                children: [
-                                                  Icon(LineIcons.calendar,
-                                                    color: foodGrey,
-                                                  ),
-                                                  SizedBox(width: 1.w,),
-                                                  Row(
-                                                    children: [
-                                                      Text('Data ważności: ',
-                                                        style: TextStyle(
-                                                            color: foodGrey
-                                                        ),
-                                                      ),
-                                                      Text('${formatter.format(food.expirationDate)}',
-                                                        style: TextStyle(
-                                                            color: foodBlueGreen
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  )
-                                                ],
-                                              ),
-                                            ],
+                                          height: 20.h,
+                                          child: GoogleMap(
+                                            initialCameraPosition: _kGooglePlex,
+                                            circles: circles,
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                    Container(
-                                      width: 90.w,
-                                      height: 20.h,
-                                      child: GoogleMap(
-                                        initialCameraPosition: _kGooglePlex,
-                                        circles: circles,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(10, 15, 10, 15),
-                                      child: Container(
-                                        height: MediaQuery.of(context).size.height/5,
-                                        child: Text(
-                                          food.description,
-                                          textAlign: TextAlign.justify,
-                                          style: TextStyle(
-                                              color: foodGrey
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(10, 15, 10, 15),
+                                          child: Container(
+                                            height: MediaQuery.of(context).size.height/5,
+                                            child: Text(
+                                              food.description,
+                                              textAlign: TextAlign.justify,
+                                              style: TextStyle(
+                                                  color: foodGrey
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                      ),
+                                      ],
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
                             ),
@@ -502,6 +569,7 @@ class _FoodViewState extends State<FoodView> {
                     ),
                     onPressed: () async{
                       var user = await FireBase.getUserFromUid(food.uid).then((value) async{
+                        print('the user is $value');
                         Map<String, dynamic> params = {'food': food, 'user': value};
                         BlocProvider.of<ReserveFoodBloc>(context).add(ReserveFood(params));
                         Navigator.of(context).pop();
@@ -527,61 +595,60 @@ class _FoodViewState extends State<FoodView> {
     );
   }
 
-  Widget _buildLikeHeart(BuildContext context){
-    return BlocBuilder<CheckFavouriteBloc, CheckFavouritesState>(
-      builder: (context, state){
-        if(state is CheckFavouritesDone){
-          return GestureDetector(
-            onTap: (){
-              if(state.isFavourite!){
-                BlocProvider.of<FavouriteBloc>(context).add(RemoveFromFavourites(food));
-                BlocProvider.of<GetFavouritesBloc>(context).add(GetAllFavourites(FirebaseAuth.instance.currentUser!.uid));
-              }else{
-                BlocProvider.of<FavouriteBloc>(context).add(AddToFavourites(food));
-                BlocProvider.of<GetFavouritesBloc>(context).add(GetAllFavourites(FirebaseAuth.instance.currentUser!.uid));
-              }
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(90),
-                  color: Colors.white
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(5),
-                child: isFave! ?
-                Icon(LineIcons.heartAlt,
-                  size: 50,
-                  color: foodOrange,
-                )
-                    : Icon(LineIcons.heart,
-                  size: 50,
-                  color: foodGrey,
+  Widget _buildLikeHeart(BuildContext blocContext){
+        return BlocBuilder<CheckFavouriteBloc, CheckFavouritesState>(
+          builder: (context, state){
+            if(state is CheckFavouritesDone){
+              print('kotki');
+              //return Container();
+              // print(state.isFavourite!);
+              return GestureDetector(
+                onTap: (){
+                  if(state.isFavourite!){
+                    BlocProvider.of<FavouriteBloc>(blocContext).add(RemoveFromFavourites(food));
+                    BlocProvider.of<GetFavouritesBloc>(context).add(GetAllFavourites(FirebaseAuth.instance.currentUser!.uid));
+                  }else{
+                    BlocProvider.of<FavouriteBloc>(blocContext).add(AddToFavourites(food));
+                    BlocProvider.of<GetFavouritesBloc>(context).add(GetAllFavourites(FirebaseAuth.instance.currentUser!.uid));
+                  }
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(90),
+                      color: Colors.white
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: state.isFavourite! ?
+                    Icon(LineIcons.heartAlt,
+                      size: 50,
+                      color: foodOrange,
+                    )
+                        : Icon(LineIcons.heart,
+                      size: 50,
+                      color: foodGrey,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          );
-        }else{
-          return Container(
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(90),
-                color: Colors.white
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(5),
-              child: isFave! ?
-              Icon(LineIcons.heartAlt,
-                size: 50,
-                color: foodOrange,
-              )
-                  : Icon(LineIcons.heart,
-                size: 50,
-                color: foodGrey,
-              ),
-            ),
-          );
-        }
-      }
-    );
+              );
+            }else{
+              print('nie ma kotków');
+              return Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(90),
+                    color: Colors.white
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(5),
+                  child: Icon(LineIcons.heart,
+                    size: 50,
+                    color: foodGrey,
+                  ),
+                ),
+              );
+            }
+          }
+        );
   }
 
   Widget _buildBottomAppBar(){
@@ -599,8 +666,8 @@ class _FoodViewState extends State<FoodView> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-
+                  onPressed: () async{
+                    _showDeleteReservationDialog();
                   },
                   child: Row(
                     children: [
@@ -633,8 +700,8 @@ class _FoodViewState extends State<FoodView> {
                 ),
                 SizedBox(width: 3.w,),
                 ElevatedButton(
-                  onPressed: () {
-
+                  onPressed: () async{
+                    _showConfirmReservationDialog();
                   },
                   child: Row(
                     children: [
@@ -750,10 +817,6 @@ class _FoodViewState extends State<FoodView> {
             ElevatedButton(
               onPressed: () async{
                 _showMyDialog();
-                // var user = await FireBase.getUserFromUid(food.uid).then((value) {
-                //   Map<String, dynamic> message = {'user' : value, 'message' : Message('Witaj, jestem zainteresowana/y porcją: ${food.name}. Kiedy możemy się spotkać?', DateTime.now(), FirebaseAuth.instance.currentUser!.uid, false)};
-                //   BlocProvider.of<MessagesBloc>(context).add(SendMessage(message));
-                // });
               },
               child: Row(
                 children: [
@@ -1047,11 +1110,134 @@ class _FoodViewState extends State<FoodView> {
                 TextButton(
                   child: const Text('Usuwam!',
                     style: TextStyle(
-                        color: foodOrange
+                        color: foodBlueGreen
                     ),
                   ),
                   onPressed: () async{
                     BlocProvider.of<DeleteFoodBloc>(context).add(DeleteFood(food));
+                    Navigator.of(context).pop();
+                  },
+                ),
+                //),
+                TextButton(
+                  child: const Text('Anuluj',
+                    style: TextStyle(
+                        color: foodOrange
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+
+
+  Future<void> _showDeleteReservationDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Text("Czy jesteś pewien, że chcesz usunąć rezerwację: ${food.name}?",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: foodBlueGreen,
+                    ),
+                  ),
+                  Text("Porcja była już zarezerwowana!",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: foodBlueGreen,
+                    ),
+                  ),
+                ],
+              )
+          ),
+          actions: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  child: const Text('Usuwam!',
+                    style: TextStyle(
+                        color: foodBlueGreen
+                    ),
+                  ),
+                  onPressed: () async{
+                    var reservationMap = await FireBase.getFoodReservation(food).then((value) async{
+                      BlocProvider.of<DeleteReservationBloc>(context).add(DeleteReservation(value['reservation']));
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
+                //),
+                TextButton(
+                  child: const Text('Anuluj',
+                    style: TextStyle(
+                        color: foodOrange
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showConfirmReservationDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Text("Czy jesteś pewien, że chcesz potwierdzić rezerwację: ${food.name}?",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: foodBlueGreen,
+                    ),
+                  ),
+                  Text("Po potwierdzeniu, użytkownik będzie mógł cię ocenić!",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: foodBlueGreen,
+                    ),
+                  ),
+                ],
+              )
+          ),
+          actions: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                  child: const Text('Usuwam!',
+                    style: TextStyle(
+                        color: foodBlueGreen
+                    ),
+                  ),
+                  onPressed: () async{
+                    var reservationMap = await FireBase.getFoodReservation(food).then((value) async{
+                      BlocProvider.of<ConfirmReservationBloc>(context).add(ConfirmReservation(value['reservation']));
+                    });
                     Navigator.of(context).pop();
                   },
                 ),

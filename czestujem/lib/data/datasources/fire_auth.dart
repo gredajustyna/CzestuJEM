@@ -43,6 +43,10 @@ class FireAuth {
     documentReference = FirebaseFirestore.instance.collection("favouriteFood").doc(user?.uid);
     userMap ={};
     documentReference.set(userMap);
+    documentReference = FirebaseFirestore.instance.collection("reservationsCollection").doc(user?.uid);
+    documentReference.set(userMap);
+    documentReference = FirebaseFirestore.instance.collection("usersToRateCollection").doc(user?.uid);
+    documentReference.set(userMap);
 
     return user;
   }

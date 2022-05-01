@@ -305,7 +305,9 @@ class FireBase{
     CollectionReference messages = chats.doc(docId).collection("messages");
     var snapFoods = await messages.get();
     Future.forEach(snapFoods.docs, (QueryDocumentSnapshot element) async{
-      await element.reference.update({'seen' : true});
+      if(element['from'] != FirebaseAuth.instance.currentUser!.uid){
+        await element.reference.update({'seen' : true});
+      }
     });
   }
 
@@ -328,16 +330,13 @@ class FireBase{
 
   }
 
-  static Future<String> reserveFood(Food food, FireUser user) async{
+  static Future<void> reserveFood(Food food, FireUser user) async{
     Message message = Message('Witaj, jestem zainteresowana/y porcją: ${food.name}. Kiedy możemy się spotkać?', DateTime.now(), FirebaseAuth.instance.currentUser!.uid, false);
-    await FireBase.sendMessage(message, user);
-    await FireBase.updateFoodStatus(food, 'zarezerwowane');
-    var resDoc = FirebaseFirestore.instance.collection('reservationsCollection').doc(FirebaseAuth.instance.currentUser!.uid).collection('food').doc(food.id);
-    print('The resDoc id is ${resDoc.id}');
-    resDoc.set({'id' : food.id, 'date' : Timestamp.fromDate(DateTime.now())});
-    return '1';
-    //var res = Reservation(food, resId.toString(), DateTime.now());
-    //await resDoc.set({'id' : resId.toString(), 'date' : Timestamp.fromDate(DateTime.now())});
+    await FirebaseFirestore.instance.collection('reservationsCollection').doc(FirebaseAuth.instance.currentUser!.uid).collection('food').doc(food.id).set({'id' : food.id, 'date' : Timestamp.fromDate(DateTime.now())}).then((value) async{
+      await FireBase.sendMessage(message, user).then((value2) async{
+        await FireBase.updateFoodStatus(food, 'zarezerwowane');
+      });
+    });
   }
 
 
@@ -387,7 +386,59 @@ class FireBase{
   static Future<void> deleteReservation(Reservation reservation) async{
     Message message = Message('Witaj, porcja: ${reservation.food.name} jest jednak niedostępna. Przepraszam za kłopot.', DateTime.now(), FirebaseAuth.instance.currentUser!.uid, false);
     await updateFoodStatus(reservation.food, "dostępne");
-    
+    var resCol = await FirebaseFirestore.instance.collection('reservationsCollection').get();
+    Future.forEach(resCol.docs, (QueryDocumentSnapshot element) async{
+      var resColUser = await FirebaseFirestore.instance.collection('reservationsCollection').doc(element.id).collection('food').get();
+      Future.forEach(resColUser.docs, (QueryDocumentSnapshot userElement) async{
+        if(userElement.id == reservation.id){
+          var user = await getUserFromUid(element.id);
+          await sendMessage(message, user);
+          await userElement.reference.delete();
+        }
+      });
+    });
+  }
+
+  static Future<void> confirmReservation(Reservation reservation) async{
+    Message message = Message('Cześć, dzięki za odbiór: ${reservation.food.name}! Do zobaczenia przy następnym posiłku!', DateTime.now(), FirebaseAuth.instance.currentUser!.uid, false);
+    var docRef = await FirebaseFirestore.instance.collection('foodCollection').where('id', isEqualTo: reservation.food.id).get();
+    for(var doc in docRef.docs){
+      await doc.reference.delete();
+    }
+    var favRef = await FirebaseFirestore.instance.collection('favouriteFood').where(reservation.food.id, isEqualTo: null).get();
+    for(var doc in favRef.docs){
+      await doc.reference.update({reservation.food.id : FieldValue.delete()});
+    }
+    var resCol = await FirebaseFirestore.instance.collection('reservationsCollection').get();
+    Future.forEach(resCol.docs, (QueryDocumentSnapshot element) async{
+      var resColUser = await FirebaseFirestore.instance.collection('reservationsCollection').doc(element.id).collection('food').get();
+      Future.forEach(resColUser.docs, (QueryDocumentSnapshot userElement) async{
+        if(userElement.id == reservation.id){
+          var user = await getUserFromUid(element.id);
+          await sendMessage(message, user);
+          await userElement.reference.delete();
+          var usersToRateDoc = FirebaseFirestore.instance.collection('usersToRateCollection').doc(user.uid);
+          await usersToRateDoc.update({FirebaseAuth.instance.currentUser!.uid : null});
+        }
+      });
+    });
+  }
+
+  static Future<Map<String, dynamic>> getFoodReservation(Food food) async{
+    var user;
+    var reservation;
+    var resCol = await FirebaseFirestore.instance.collection('reservationsCollection').get();
+    await Future.forEach(resCol.docs, (QueryDocumentSnapshot element) async{
+      var resColUser = await FirebaseFirestore.instance.collection('reservationsCollection').doc(element.id).collection('food').get();
+      await Future.forEach(resColUser.docs, (QueryDocumentSnapshot userElement) async{
+        if(userElement.id == food.id){
+          user = await getUserFromUid(element.id);
+          reservation =  Reservation(food, food.id, userElement.get('date').toDate());
+        }
+      });
+    });
+    var resMap = {'user' : user, 'reservation' : reservation};
+    return resMap;
   }
 
 }

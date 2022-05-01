@@ -22,6 +22,7 @@ class CheckFavouriteBloc extends Bloc<FavouriteEvent, CheckFavouritesState>{
   Future<void> _favouriteHandler(Emitter<CheckFavouritesState> emit, Food params) async {
     emit(const CheckFavouritesLoading());
     var result = await _checkIfFavouriteUseCase(params: params);
+    print('check fave result is $result');
     if(result == true){
       emit(CheckFavouritesDone(true));
     }else if(result ==false){

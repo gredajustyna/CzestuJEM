@@ -108,6 +108,9 @@ class _ChatListTileState extends State<ChatListTile> {
                                         ),
                                       ),
                                     ),
+                                    Container(
+                                      child: (state.lastMessage!.seen && state.lastMessage!.from == FirebaseAuth.instance.currentUser!.uid) ? Icon(LineIcons.check, size: 15,) : Container(),
+                                    ),
                                     Text(state.lastMessage!.sent.hour == 0 ? DateFormat('kk:mm').format(state.lastMessage!.sent).replaceRange(0, 2, '00') : DateFormat('kk:mm').format(state.lastMessage!.sent),
                                       style: TextStyle(
                                           fontWeight: (state.lastMessage!.seen || state.lastMessage!.from == FirebaseAuth.instance.currentUser!.uid) ? FontWeight.normal : FontWeight.bold,

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:czestujem/domain/entities/fireuser.dart';
 import 'package:czestujem/domain/entities/message.dart';
+import 'package:czestujem/domain/entities/reservation.dart';
 import 'package:flutter/cupertino.dart';
 
 import '../entities/food.dart';
@@ -62,4 +63,8 @@ abstract class AppRepository{
   Future<void> deleteRate(FireUser user);
 
   Future<void> readMessages(FireUser user);
+
+  Future<void> deleteReservation(Reservation reservation);
+
+  Future<void> confirmReservation(Reservation reservation);
 }

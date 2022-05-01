@@ -86,7 +86,11 @@ class _FoodTileState extends State<FoodTile> {
                               Flexible(
                                 child: InkWell(
                                   onTap: (){
-                                    Navigator.push(context, _createAnimatedRouteRight(FoodView(food: food, context: usernameBlocContext)));
+                                    Navigator.push(context, _createAnimatedRouteRight(FoodView(food: food, context: usernameBlocContext))).then((value) {
+                                      setState(() {
+
+                                      });
+                                    });
                                     //_createAnimatedRouteRight(FoodView(food: food, context: usernameBlocContext));
                                     //Navigator.of(usernameBlocContext).push(MaterialPageRoute(builder: (BuildContext context) => FoodView(food: food, context: usernameBlocContext,)));
                                   },

@@ -5,6 +5,7 @@ import 'package:czestujem/data/datasources/fire_base.dart';
 import 'package:czestujem/domain/entities/fireuser.dart';
 import 'package:czestujem/domain/entities/food.dart';
 import 'package:czestujem/domain/entities/message.dart';
+import 'package:czestujem/domain/entities/reservation.dart';
 import 'package:czestujem/domain/repositories/app_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -134,9 +135,7 @@ class AppRepositoryImpl implements AppRepository{
   }
 
   Future<dynamic> reserveFood(Food food, FireUser user) async {
-    var message = Message('Witaj, jestem zainteresowana/y porcją: ${food.name}. Kiedy możemy się spotkać?', DateTime.now(), FirebaseAuth.instance.currentUser!.uid, false);
-    await FireBase.sendMessage(message, user);
-    await FireBase.updateFoodStatus(food, 'zarezerwowane');
+    await FireBase.reserveFood(food, user);
   }
 
   @override
@@ -175,6 +174,16 @@ class AppRepositoryImpl implements AppRepository{
   @override
   Future<void> readMessages(FireUser user) async{
     await FireBase.readMessages(user);
+  }
+
+  @override
+  Future<void> confirmReservation(Reservation reservation) async{
+    await FireBase.confirmReservation(reservation);
+  }
+
+  @override
+  Future<void> deleteReservation(Reservation reservation) async{
+    await FireBase.deleteReservation(reservation);
   }
 
 
